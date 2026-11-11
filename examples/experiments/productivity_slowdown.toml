@@ -1,0 +1,14 @@
+name = "productivity_slowdown"
+question = "What happens to real output, wages and poverty if trend productivity growth falls from 1.5% to 0.5% a year?"
+seeds = [1, 2, 3, 4, 5]
+warmup_months = 24
+horizon_months = 120
+
+[baseline]
+name = "baseline"
+description = "Trend productivity growth 1.5%/yr"
+
+[[variants]]
+name = "slowdown"
+description = "Trend productivity growth 0.5%/yr from the branch date"
+overrides = { "economy.productivity_growth" = 0.005 }

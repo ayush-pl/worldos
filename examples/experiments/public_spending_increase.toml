@@ -1,0 +1,14 @@
+name = "public_spending_increase"
+question = "How do output, unemployment, prices and public debt respond when public consumption rises from 13% to 15% of trailing GDP?"
+seeds = [1, 2, 3, 4, 5]
+warmup_months = 24
+horizon_months = 60
+
+[baseline]
+name = "baseline"
+description = "Spending share unchanged (13%)"
+
+[[variants]]
+name = "spending_15pct"
+description = "Spending share raised to 15% at the branch date"
+overrides = { "government.spending_share" = 0.15 }

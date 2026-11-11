@@ -1,0 +1,369 @@
+# WORLD-OS global data catalogue (v0.1).
+#
+# license_status:
+#   "stated"  - licence as published by the provider at the time of writing; re-check on ingestion.
+#   "verify"  - licence terms are dataset-specific, recently changed, or restrictive; a human must
+#               confirm the exact terms before ingestion (enforced by worldos.data.catalogue).
+# alpha_use: Alpha simulates a synthetic country and ingests NONE of these datasets yet.
+#
+# Licence claims are informational, not legal advice. URLs are provider landing pages.
+
+[[dataset]]
+id = "un_wpp"
+name = "World Population Prospects"
+provider = "United Nations, DESA Population Division"
+url = "https://population.un.org/wpp/"
+domains = ["population", "demographics", "fertility", "mortality", "migration"]
+spatial = "countries and areas; regional aggregates"
+temporal = "1950-present estimates; projections to 2100"
+license = "CC BY 3.0 IGO"
+license_status = "stated"
+planned_use = "Age-sex structure, fertility and mortality schedules for calibrating the demography engine (M2/M3)."
+
+[[dataset]]
+id = "human_mortality_database"
+name = "Human Mortality Database"
+provider = "Max Planck Institute for Demographic Research; UC Berkeley; INED"
+url = "https://www.mortality.org/"
+domains = ["mortality", "life tables"]
+spatial = "about 40 countries, national"
+temporal = "country-specific, some from the 18th century"
+license = "CC BY 4.0"
+license_status = "verify"
+planned_use = "Fitting and validating the Siler mortality model; historical reconstruction of mortality."
+
+[[dataset]]
+id = "worldpop"
+name = "WorldPop gridded population"
+provider = "WorldPop, University of Southampton"
+url = "https://www.worldpop.org/"
+domains = ["population", "geography"]
+spatial = "100 m and 1 km grids, global"
+temporal = "2000-2020 (product dependent)"
+license = "CC BY 4.0"
+license_status = "stated"
+planned_use = "Spatial allocation of synthetic households to H3 cells."
+
+[[dataset]]
+id = "ghsl"
+name = "Global Human Settlement Layer"
+provider = "European Commission Joint Research Centre"
+url = "https://human-settlement.emergency.copernicus.eu/"
+domains = ["urbanisation", "built environment", "population"]
+spatial = "global grids (10 m - 1 km)"
+temporal = "1975-2030 epochs (product dependent)"
+license = "CC BY 4.0"
+license_status = "stated"
+planned_use = "City/town/village delineation (degree of urbanisation) and settlement hierarchy."
+
+[[dataset]]
+id = "natural_earth_admin"
+name = "Natural Earth administrative boundaries"
+provider = "Natural Earth"
+url = "https://www.naturalearthdata.com/"
+domains = ["geography", "boundaries"]
+spatial = "admin-0 and admin-1, 1:10m-1:110m"
+temporal = "current"
+license = "Public domain"
+license_status = "stated"
+planned_use = "Country and province geometries for the geographic hierarchy."
+
+[[dataset]]
+id = "gadm"
+name = "GADM administrative areas"
+provider = "GADM project"
+url = "https://gadm.org/"
+domains = ["geography", "boundaries"]
+spatial = "admin levels 0-5"
+temporal = "current"
+license = "Free for academic and non-commercial use; redistribution restricted"
+license_status = "verify"
+planned_use = "Candidate for district-level boundaries; licence likely incompatible with redistribution - prefer national open data or OSM."
+
+[[dataset]]
+id = "openstreetmap"
+name = "OpenStreetMap"
+provider = "OpenStreetMap Foundation and contributors"
+url = "https://www.openstreetmap.org/"
+domains = ["infrastructure", "transport", "buildings", "land use"]
+spatial = "global, vector"
+temporal = "continuously updated"
+license = "ODbL 1.0"
+license_status = "stated"
+planned_use = "Roads, rail, ports, power lines, schools, hospitals for the infrastructure layer (share-alike obligations apply to derived databases)."
+
+[[dataset]]
+id = "wb_wdi"
+name = "World Development Indicators"
+provider = "World Bank"
+url = "https://databank.worldbank.org/source/world-development-indicators"
+domains = ["economy", "employment", "poverty", "health", "education", "energy"]
+spatial = "countries, national"
+temporal = "1960-present, annual"
+license = "CC BY 4.0"
+license_status = "stated"
+planned_use = "Macro calibration targets (GDP, labour shares, government spending, poverty)."
+
+[[dataset]]
+id = "imf_data"
+name = "IMF data (WEO, IFS, GFS)"
+provider = "International Monetary Fund"
+url = "https://data.imf.org/"
+domains = ["economy", "public finance", "money", "exchange rates"]
+spatial = "countries"
+temporal = "dataset dependent"
+license = "IMF copyright and usage terms (custom)"
+license_status = "verify"
+planned_use = "Fiscal and monetary aggregates; government debt; policy rates."
+
+[[dataset]]
+id = "oecd_data"
+name = "OECD Data Explorer"
+provider = "OECD"
+url = "https://data-explorer.oecd.org/"
+domains = ["economy", "labour", "income distribution", "taxation"]
+spatial = "OECD and partner countries"
+temporal = "dataset dependent"
+license = "CC BY 4.0 (OECD open-by-default policy)"
+license_status = "verify"
+planned_use = "Tax-benefit parameters, income distribution, labour-market flows."
+
+[[dataset]]
+id = "penn_world_table"
+name = "Penn World Table 10.01"
+provider = "Groningen Growth and Development Centre"
+url = "https://www.rug.nl/ggdc/productivity/pwt/"
+domains = ["economy", "productivity", "capital"]
+spatial = "183 countries"
+temporal = "1950-2019"
+license = "CC BY 4.0"
+license_status = "stated"
+planned_use = "Productivity growth, capital stocks and labour shares for the growth/technology engine."
+
+[[dataset]]
+id = "ilostat"
+name = "ILOSTAT"
+provider = "International Labour Organization"
+url = "https://ilostat.ilo.org/"
+domains = ["employment", "unemployment", "wages", "labour force"]
+spatial = "countries"
+temporal = "dataset dependent"
+license = "CC BY 4.0"
+license_status = "verify"
+planned_use = "Labour-force participation by age/sex, unemployment, wage distributions."
+
+[[dataset]]
+id = "wid"
+name = "World Inequality Database"
+provider = "World Inequality Lab"
+url = "https://wid.world/"
+domains = ["income distribution", "wealth distribution"]
+spatial = "countries"
+temporal = "dataset dependent"
+license = "see provider terms"
+license_status = "verify"
+planned_use = "Calibrating initial income and wealth distributions."
+
+[[dataset]]
+id = "fao_faostat"
+name = "FAOSTAT"
+provider = "Food and Agriculture Organization of the UN"
+url = "https://www.fao.org/faostat/"
+domains = ["agriculture", "food", "land use", "food prices"]
+spatial = "countries"
+temporal = "1961-present"
+license = "CC BY 4.0"
+license_status = "verify"
+planned_use = "Crop production, yields, land use and food balances for the agriculture engine (Phase 3)."
+
+[[dataset]]
+id = "era5"
+name = "ERA5 reanalysis"
+provider = "ECMWF / Copernicus Climate Change Service"
+url = "https://cds.climate.copernicus.eu/"
+domains = ["climate", "weather"]
+spatial = "0.25 degree global, hourly"
+temporal = "1940-present"
+license = "Copernicus licence (check CDS dataset page for current terms)"
+license_status = "verify"
+planned_use = "Historical weather and climate forcing; validation of downscaled climate fields."
+
+[[dataset]]
+id = "nasa_earthdata"
+name = "NASA Earthdata (e.g. MODIS, GPM, GRACE)"
+provider = "NASA Earth Science Data Systems"
+url = "https://www.earthdata.nasa.gov/"
+domains = ["land cover", "vegetation", "precipitation", "groundwater"]
+spatial = "global, product dependent"
+temporal = "product dependent"
+license = "NASA open data policy (no restrictions on use; attribution requested)"
+license_status = "stated"
+planned_use = "Earth observation inputs for water, vegetation and land engines."
+
+[[dataset]]
+id = "esa_worldcover"
+name = "ESA WorldCover"
+provider = "European Space Agency"
+url = "https://esa-worldcover.org/"
+domains = ["land cover"]
+spatial = "10 m global"
+temporal = "2020, 2021"
+license = "CC BY 4.0"
+license_status = "stated"
+planned_use = "Land-cover classes per H3 cell."
+
+[[dataset]]
+id = "soilgrids"
+name = "SoilGrids"
+provider = "ISRIC - World Soil Information"
+url = "https://soilgrids.org/"
+domains = ["soil"]
+spatial = "250 m global"
+temporal = "static"
+license = "CC BY 4.0"
+license_status = "verify"
+planned_use = "Soil properties for crop-yield models."
+
+[[dataset]]
+id = "global_forest_change"
+name = "Global Forest Change (Hansen et al.)"
+provider = "University of Maryland / Global Forest Watch"
+url = "https://www.globalforestwatch.org/"
+domains = ["forests", "deforestation", "biodiversity"]
+spatial = "30 m global"
+temporal = "2000-present, annual"
+license = "CC BY 4.0"
+license_status = "verify"
+planned_use = "Forest cover and loss for land-use and biodiversity engines."
+
+[[dataset]]
+id = "gbif"
+name = "Global Biodiversity Information Facility"
+provider = "GBIF"
+url = "https://www.gbif.org/"
+domains = ["biodiversity", "species occurrences"]
+spatial = "global points"
+temporal = "dataset dependent"
+license = "Per dataset: CC0, CC BY 4.0 or CC BY-NC 4.0"
+license_status = "verify"
+planned_use = "Species occurrence data for habitat/biodiversity indicators; must filter by licence."
+
+[[dataset]]
+id = "global_carbon_budget"
+name = "Global Carbon Budget"
+provider = "Global Carbon Project"
+url = "https://globalcarbonbudget.org/"
+domains = ["emissions", "carbon cycle"]
+spatial = "global and national"
+temporal = "1750-present"
+license = "CC BY 4.0"
+license_status = "verify"
+planned_use = "Historical CO2 emissions for validating the emissions accounting."
+
+[[dataset]]
+id = "noaa_gml_co2"
+name = "NOAA GML atmospheric CO2 trends"
+provider = "NOAA Global Monitoring Laboratory"
+url = "https://gml.noaa.gov/ccgg/trends/"
+domains = ["atmospheric composition"]
+spatial = "global mean and stations"
+temporal = "1958-present"
+license = "US Government work (public domain); attribution requested"
+license_status = "stated"
+planned_use = "Validation target for the carbon-cycle / concentration module."
+
+[[dataset]]
+id = "hadcrut5"
+name = "HadCRUT5 global temperature"
+provider = "Met Office Hadley Centre and University of East Anglia CRU"
+url = "https://www.metoffice.gov.uk/hadobs/hadcrut5/"
+domains = ["climate", "temperature"]
+spatial = "5 degree grid and global mean"
+temporal = "1850-present"
+license = "Open Government Licence v3"
+license_status = "verify"
+planned_use = "Validation of simulated global mean surface temperature."
+
+[[dataset]]
+id = "ipcc_ssp_database"
+name = "SSP Public Database (scenario drivers and IAM outputs)"
+provider = "IIASA"
+url = "https://data.ece.iiasa.ac.at/ssp/"
+domains = ["scenarios", "population projections", "GDP projections", "emissions"]
+spatial = "countries and regions"
+temporal = "2005-2100"
+license = "IIASA database terms"
+license_status = "verify"
+planned_use = "Exogenous scenario drivers and benchmarks for long-horizon experiments."
+
+[[dataset]]
+id = "ember_electricity"
+name = "Ember electricity data"
+provider = "Ember"
+url = "https://ember-energy.org/data/"
+domains = ["energy", "electricity generation", "emissions"]
+spatial = "countries"
+temporal = "2000-present"
+license = "CC BY 4.0"
+license_status = "verify"
+planned_use = "Generation mix and power-sector emissions for the energy engine."
+
+[[dataset]]
+id = "wri_power_plants"
+name = "Global Power Plant Database"
+provider = "World Resources Institute"
+url = "https://datasets.wri.org/"
+domains = ["energy", "infrastructure"]
+spatial = "plant-level points"
+temporal = "snapshot (2021)"
+license = "CC BY 4.0"
+license_status = "verify"
+planned_use = "Plant-level generation assets."
+
+[[dataset]]
+id = "exiobase"
+name = "EXIOBASE multi-regional input-output tables"
+provider = "EXIOBASE consortium"
+url = "https://www.exiobase.eu/"
+domains = ["trade", "supply chains", "environmental extensions"]
+spatial = "44 countries + 5 rest-of-world regions"
+temporal = "1995-2022 (version dependent)"
+license = "CC BY-SA 4.0"
+license_status = "verify"
+planned_use = "Inter-industry structure for the multi-sector economy and international trade (Phase 2/4)."
+
+[[dataset]]
+id = "cepii_baci"
+name = "BACI bilateral trade database"
+provider = "CEPII"
+url = "https://www.cepii.fr/"
+domains = ["international trade"]
+spatial = "about 200 countries, HS6 products"
+temporal = "1995-present"
+license = "Etalab Open Licence 2.0"
+license_status = "verify"
+planned_use = "Bilateral trade flows for the trade engine."
+
+[[dataset]]
+id = "who_gho"
+name = "WHO Global Health Observatory"
+provider = "World Health Organization"
+url = "https://www.who.int/data/gho"
+domains = ["health"]
+spatial = "countries"
+temporal = "dataset dependent"
+license = "CC BY-NC-SA 3.0 IGO (non-commercial)"
+license_status = "verify"
+planned_use = "Health indicators; non-commercial clause must be respected."
+
+[[dataset]]
+id = "unesco_uis"
+name = "UNESCO Institute for Statistics"
+provider = "UNESCO"
+url = "https://uis.unesco.org/"
+domains = ["education"]
+spatial = "countries"
+temporal = "dataset dependent"
+license = "see provider terms"
+license_status = "verify"
+planned_use = "Educational attainment and enrolment for the education/life-course model."

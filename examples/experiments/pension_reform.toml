@@ -1,0 +1,13 @@
+name = "pension_reform"
+question = "What are the distributional and fiscal effects of cutting the pension replacement rate from 40% to 35% of the mean wage two years after the branch date?"
+seeds = [1, 2, 3, 4, 5]
+warmup_months = 24
+horizon_months = 72
+
+[baseline]
+name = "baseline"
+
+[[variants]]
+name = "pension_cut"
+description = "Pension replacement 0.40 -> 0.35 at month 24 after branch"
+interventions = [ { at_month = 24, path = "government.pension_replacement", value = 0.35 } ]
