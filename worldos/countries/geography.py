@@ -4,9 +4,13 @@
   disjoint); a region too small for any cell gets the cell containing its representative point.
 * Settlements: Natural Earth populated places (metropolitan ``pop_max``) form the urban part; each
   region also gets a "rest of region" settlement for its non-metropolitan population.
-* Population allocation (an INFERRED downscaling, documented as crude): the urban share of the
-  population (WDI) is split across listed cities by ``pop_max``; the remainder is split across
-  regions in proportion to their area. Gridded population (WorldPop/GHSL) is the planned upgrade.
+* Population allocation:
+  - with a gridded layer (Kontur Population on H3, default for committed countries): households are
+    placed on H3 cells in proportion to gridded population; a cell belongs to a city if it lies within
+    a small ring (1 cell at resolution <= 5, 2 at resolution 6) of that city's cell (larger cities first),
+    otherwise to its region's "rest of region" settlement;
+  - fallback (INFERRED, crude): the urban share (WDI) split across cities by ``pop_max``, the rest
+    across regions by area.
 """
 
 from __future__ import annotations
@@ -38,7 +42,8 @@ def choose_resolution(area_km2: float, max_cells: int = 12_000) -> int:
 
 
 def build_country_geography(iso3: str, geojson: dict, urban_share: float, max_cities: int = 40,
-                            ) -> tuple[GeoHierarchy, SettlementLayout, dict]:
+                            grid: dict[str, float] | None = None) -> tuple[GeoHierarchy, SettlementLayout, dict]:
+    """``grid``: optional {H3 cell at the model resolution: population} gridded layer."""
     feats = geojson["features"]
     country_f = next(f for f in feats if f["properties"]["level"] == "country")
     country_geom = shape(country_f["geometry"])
@@ -112,5 +117,42 @@ def build_country_geography(iso3: str, geojson: dict, urban_share: float, max_ci
     share = share / share.sum()
     layout = SettlementLayout(region_ids, city_ids, np.array(city_region, dtype=np.int32), share, city_cell)
     info = {"h3_resolution": res, "n_cells": len(all_cells), "n_regions": len(region_ids), "n_cities": len(places),
-            "urban_share": urban_share}
+            "urban_share": urban_share, "population_layer": "none (city pop_max + area)"}
+    if grid:
+        _attach_grid(layout, grid, res, cell_region, all_cells, places, info)
     return geo, layout, info
+
+
+def _attach_grid(layout: SettlementLayout, grid: dict[str, float], res: int, cell_region: dict, all_cells: list[str],
+                 places: list, info: dict) -> None:
+    n_city = len(places)
+    cells = [c for c, v in grid.items() if v > 0 and h3.get_resolution(c) == res]
+    pop = np.array([grid[c] for c in cells])
+    # region of each populated cell (nearest region cell for coastal cells outside the simplified outline)
+    known = np.array([c in cell_region for c in cells])
+    region = np.array([cell_region.get(c, -1) for c in cells])
+    if (~known).any():
+        ref = np.array([h3.cell_to_latlng(c) for c in all_cells])
+        ref_region = np.array([cell_region[c] for c in all_cells])
+        for i in np.flatnonzero(~known):
+            lat, lng = h3.cell_to_latlng(cells[i])
+            region[i] = ref_region[int(((ref - [lat, lng]) ** 2).sum(axis=1).argmin())]
+    settlement = n_city + region  # default: "rest of region" settlement (appended after the cities)
+    ring = 1 if res <= 5 else 2
+    index = {c: i for i, c in enumerate(cells)}
+    taken = np.zeros(len(cells), dtype=bool)
+    for j, f in enumerate(places):  # places are sorted by population, largest first
+        lng, lat = f["geometry"]["coordinates"][:2]
+        for c in h3.grid_disk(h3.latlng_to_cell(lat, lng, res), ring):
+            i = index.get(c)
+            if i is not None and not taken[i]:
+                settlement[i] = j
+                taken[i] = True
+    share = np.bincount(settlement, weights=pop, minlength=len(layout.city_ids))
+    layout.city_share = share / share.sum()
+    layout.cell_ids = cells
+    layout.cell_weight = pop
+    layout.cell_settlement = settlement.astype(np.int32)
+    info.update({"population_layer": "Kontur Population 2023 (H3 r8, aggregated)", "populated_cells": len(cells),
+                 "grid_population_total": float(pop.sum()),
+                 "grid_urban_share_top_cities": float(share[:n_city].sum() / share.sum())})

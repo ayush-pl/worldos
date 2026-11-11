@@ -143,3 +143,12 @@ def manifest(source: str) -> dict:
 
 def data_path(*parts: str) -> Path:
     return REAL_DATA.joinpath(*parts)
+
+
+def kontur_grid(iso3: str) -> dict[str, float] | None:
+    """Gridded population {H3 cell: persons} at the country's model resolution, if committed."""
+    files = sorted((REAL_DATA / "kontur").glob(f"{iso3}_h3r*.csv"))
+    if not files:
+        return None
+    d = pd.read_csv(files[0])
+    return dict(zip(d.h3, d.population.astype(float)))

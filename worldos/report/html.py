@@ -22,6 +22,8 @@ PANELS = [
     ("gini_income", "Gini, equivalised disposable income", "num"),
     ("population", "Population (represented persons)", "num"),
     ("bank_capital_ratio", "Bank equity / loans", "pct"),
+    ("investment_share_gdp", "Investment / GDP", "pct"),
+    ("co2_mt_annualised", "CO2 emissions (Mt/yr, annualised)", "num"),
 ]
 
 
@@ -61,7 +63,7 @@ def _chart(series: pd.Series, dates: list[str], kind: str, w: int = 320, h: int 
             f'<span>min {_fmt(lo, kind)} · max {_fmt(hi, kind)}</span><span>{html.escape(dates[-1])}</span></div>')
 
 
-def render_dashboard(metrics: pd.DataFrame, title: str, subtitle: str = "") -> str:
+def render_dashboard(metrics: pd.DataFrame, title: str, subtitle: str = "", extra_html: str = "") -> str:
     dates = metrics["date"].astype(str).tolist()
     cards = []
     for col, label, kind in PANELS:
@@ -87,9 +89,13 @@ h1 {{ font-size:22px; margin:0 0 4px; }} .muted {{ color:var(--muted); }}
 .card h2 {{ font-size:13px; font-weight:600; color:var(--muted); margin:0; }}
 .kpi {{ font-size:24px; font-weight:650; margin:2px 0 6px; font-variant-numeric:tabular-nums; }}
 svg {{ width:100%; height:auto; display:block; }} .line {{ fill:none; stroke:var(--line); stroke-width:1.6; }}
-.axis {{ stroke:var(--axis); }} .range {{ display:flex; justify-content:space-between; font-size:11px; color:var(--muted); gap:6px; flex-wrap:wrap; }}
+.axis {{ stroke:var(--axis); }} figure {{ margin:20px 0; background:var(--card); border-radius:10px; padding:12px; }}
+figcaption {{ font-size:12px; color:var(--muted); margin-top:6px; }} table {{ border-collapse:collapse; font-size:13px; width:100%; }}
+td,th {{ text-align:right; padding:3px 8px; border-bottom:1px solid var(--axis); }} td:first-child,th:first-child {{ text-align:left; }}
+.tablewrap {{ overflow-x:auto; background:var(--card); border-radius:10px; padding:12px; }} .range {{ display:flex; justify-content:space-between; font-size:11px; color:var(--muted); gap:6px; flex-wrap:wrap; }}
 </style></head><body><main>
 <h1>{html.escape(title)}</h1><p class="muted">{html.escape(subtitle)}</p>
 <p class="notice">Synthetic country with assumed parameters. A model experiment, not a forecast or a description of any real economy.</p>
 <div class="grid">{''.join(cards)}</div>
+{extra_html}
 </main></body></html>"""

@@ -50,6 +50,7 @@ class HouseholdTable(ColumnTable):
         "hid": (np.int64, -1),
         "region": (np.int32, -1),
         "city": (np.int32, -1),
+        "cell": (np.int32, -1),  # index into layout.cell_ids when a gridded layer exists
         "alive": (np.bool_, True),
         "weight": (np.float64, 1.0),
         "deposits": (np.float64, 0.0),

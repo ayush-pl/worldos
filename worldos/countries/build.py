@@ -181,7 +181,8 @@ def build_country_world(iso3: str, base_year: int = 2023, n_records: int = 40_00
     rng = RandomStreams(seed)
     urban = sources.wdi_value(iso3, "urban_population_share", base_year)
     urban_share = (urban / 100) if urban is not None else 0.5
-    geo, layout, geo_info = build_country_geography(iso3, sources.naturalearth(iso3), urban_share)
+    geo, layout, geo_info = build_country_geography(iso3, sources.naturalearth(iso3), urban_share,
+                                                    grid=sources.kontur_grid(iso3))
     rates = rates or sources.wpp_rates(iso3)
     yr = rates.for_year(base_year)
     pf, pm = sources.wpp_population(iso3, base_year)

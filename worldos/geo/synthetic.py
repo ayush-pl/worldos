@@ -25,13 +25,20 @@ from worldos.geo.hierarchy import GeoEntity, GeoHierarchy, GeoLevel
 
 @dataclass
 class SettlementLayout:
-    """Array view of settlements used by vectorised engines."""
+    """Array view of settlements used by vectorised engines.
+
+    Optional gridded layer: when ``cell_ids`` is set, households are placed on individual H3 cells
+    sampled in proportion to ``cell_weight``; ``cell_settlement`` maps each cell to a settlement.
+    """
 
     region_ids: list[str]
     city_ids: list[str]
     city_region: np.ndarray  # int index into region_ids
     city_share: np.ndarray  # population share, sums to 1
     city_cell: list[str]  # H3 cell at city resolution
+    cell_ids: list[str] | None = None
+    cell_weight: np.ndarray | None = None  # population per cell (any scale)
+    cell_settlement: np.ndarray | None = None  # settlement index per cell
 
 
 def _centroid(cells: list[str]) -> tuple[float, float]:

@@ -93,3 +93,23 @@ def test_zero_emissions_stabilise_concentration():
     o = np.r_[d.other_forcing.to_numpy(), np.full(2100 - 2023, d.other_forcing.iloc[-1])]
     run = run_climate(years, e, o, None, ClimateParams(r0=28.5))
     assert run.co2_ppm[-1] < run.co2_ppm[years == 2023][0]  # sinks draw CO2 down after emissions stop
+
+
+@pytest.mark.parametrize("iso", COUNTRIES)
+def test_gridded_population_layer(iso):
+    grid = sources.kontur_grid(iso)
+    pf, pm = sources.wpp_population(iso, 2023)
+    assert sum(grid.values()) == pytest.approx(pf.sum() + pm.sum(), rel=0.04)  # independent estimates agree
+    w = build_country_world(iso, 2023, n_records=3000, n_firms=30)
+    lay, h = w.layout, w.households
+    assert lay.cell_ids is not None and np.all(h.cell[h.alive] >= 0)
+    # households' settlement is consistent with their cell
+    assert np.array_equal(h.city[h.alive], lay.cell_settlement[h.cell[h.alive]])
+
+
+def test_regional_shares_follow_gridded_population():
+    from worldos.report.maps import regional_summary
+
+    w = build_country_world("DEU", 2023, n_records=40_000, n_firms=30)
+    top = regional_summary(w).iloc[0]
+    assert top.region == "Nordrhein-Westfalen" and 0.18 < top.population_share < 0.24

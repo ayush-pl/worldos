@@ -113,7 +113,8 @@ class DemographyEngine(Engine):
         np.subtract.at(h.deposits, parents, dep)
         np.subtract.at(h.equity_share, parents, eq)
         np.subtract.at(h.income_exp, parents, inc)
-        new = h.add(len(movers), region=h.region[parents], city=h.city[parents], weight=h.weight[parents],
+        new = h.add(len(movers), region=h.region[parents], city=h.city[parents], cell=h.cell[parents],
+                    weight=h.weight[parents],
                     deposits=dep, equity_share=eq, income_exp=inc)
         p.hh[movers] = new
         recount_members(p, h)
@@ -180,9 +181,10 @@ def apply_net_migration(world, annual_female: np.ndarray, annual_male: np.ndarra
     adult = age_m >= 18 * 12
     hh = np.full(len(sex), -1, dtype=np.int64)
     if adult.any():
-        city = h.city[rng.choice(np.flatnonzero(h.alive), size=int(adult.sum()))]
+        host = rng.choice(np.flatnonzero(h.alive), size=int(adult.sum()))  # immigrants settle where people live
+        city = h.city[host]
         lay = world.layout
-        hh[adult] = h.add(int(adult.sum()), city=city, region=lay.city_region[city], weight=weight)
+        hh[adult] = h.add(int(adult.sum()), city=city, region=lay.city_region[city], cell=h.cell[host], weight=weight)
     if (~adult).any():
         recount_members(p, h)
         living = np.flatnonzero(p.alive)

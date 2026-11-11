@@ -13,7 +13,8 @@ assembly below:
    age (assortative), forming couple households; remaining adults live alone.
 4. Attach each child (<18) to a random household whose oldest member is
    20-45 years older (fallback: nearest feasible household).
-5. Place households in cities by the settlement layout's population shares.
+5. Place households: on H3 cells in proportion to gridded population when the layout has a gridded
+   layer (real countries, Kontur Population), otherwise in settlements by their population shares.
 """
 
 from __future__ import annotations
@@ -98,10 +99,16 @@ def synthesize_population(
     pick = np.where(empty, lo_fb, lo + np.floor(rng.random(len(children)) * np.maximum(hi - lo, 1)).astype(np.int64))
     hh_of[children] = order[pick]
 
-    city = rng.choice(len(layout.city_ids), size=n_hh, p=layout.city_share)
+    if layout.cell_ids is not None:  # gridded population: sample a cell, then its settlement
+        cw = layout.cell_weight / layout.cell_weight.sum()
+        cell = rng.choice(len(cw), size=n_hh, p=cw).astype(np.int32)
+        city = layout.cell_settlement[cell]
+    else:
+        cell = np.full(n_hh, -1, dtype=np.int32)
+        city = rng.choice(len(layout.city_ids), size=n_hh, p=layout.city_share)
     equity = rng.pareto(cfg.wealth_pareto_alpha, size=n_hh) + 1.0
     households = HouseholdTable(capacity=int(n_hh * 1.5))
-    households.add(n_hh, city=city.astype(np.int32), region=layout.city_region[city], weight=weight,
+    households.add(n_hh, city=city.astype(np.int32), region=layout.city_region[city], cell=cell, weight=weight,
                    equity_share=equity / equity.sum())
     persons.hh = hh_of[pidx - pidx[0]]
     recount_members(persons, households)

@@ -86,7 +86,9 @@ def _cmd_data(args: argparse.Namespace) -> int:
     from worldos.data.connectors.wdi import fetch_wdi
     from worldos.data.connectors.wpp import fetch_wpp
 
-    fetchers = {"wpp": fetch_wpp, "wdi": fetch_wdi, "naturalearth": fetch_naturalearth}
+    from worldos.data.connectors.kontur import fetch_kontur
+
+    fetchers = {"wpp": fetch_wpp, "wdi": fetch_wdi, "naturalearth": fetch_naturalearth, "kontur": fetch_kontur}
     countries = args.countries.split(",") if args.countries else None
     for name in args.sources.split(","):
         if name == "climate":
@@ -127,10 +129,19 @@ def _cmd_country(args: argparse.Namespace) -> int:
     sim = Simulation(world).run(args.months)
     df = sim.metrics_frame()
     df.to_csv(out / "metrics.csv", index=False)
+    from worldos.report.maps import population_map_svg, regional_summary
+
+    regions = regional_summary(world)
+    regions.to_csv(out / "regions.csv", index=False)
+    table = regions.head(15).to_html(index=False, float_format=lambda v: f"{v:,.3f}" if abs(v) < 10 else f"{v:,.0f}")
+    extra = (f"<h2>Population map</h2>{population_map_svg(world)}"
+             f"<h2>Largest regions at end of run</h2><div class='tablewrap'>{table}</div>")
     (out / "dashboard.html").write_text(render_dashboard(
         df, f"WORLD-OS: {world.country.name}",
-        f"Real demographic/geographic data, calibrated simplified economy · seed {args.seed} · from {args.base_year}"))
-    print(f"{world.country.name}: simulated {args.months} months; outputs in {out}/")
+        f"Real demographic/geographic data, calibrated simplified economy · seed {args.seed} · from {args.base_year}",
+        extra_html=extra))
+    print(f"{world.country.name}: simulated {args.months} months; outputs in {out}/ "
+          "(metrics.csv, regions.csv, dashboard.html)")
     return 0
 
 
@@ -169,7 +180,7 @@ def main(argv: list[str] | None = None) -> int:
     c.set_defaults(func=_cmd_catalogue)
     d = sub.add_parser("data", help="fetch real data extracts or verify their checksums")
     d.add_argument("action", choices=["fetch", "verify"])
-    d.add_argument("--sources", default="wpp,wdi,naturalearth,climate")
+    d.add_argument("--sources", default="wpp,wdi,naturalearth,kontur,climate")
     d.add_argument("--countries", default="", help="comma-separated ISO3 codes (default: the six committed)")
     d.set_defaults(func=_cmd_data)
     k = sub.add_parser("country", help="real-country worlds: list | calibrate | validate | run")

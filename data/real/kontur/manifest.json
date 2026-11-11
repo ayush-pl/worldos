@@ -1,0 +1,50 @@
+{
+  "source": "Kontur Population 2023-11-01 (H3 r8), via HDX",
+  "license": "CC BY 4.0",
+  "retrieved_utc": "2026-11-11T12:34:58+00:00",
+  "notes": "Population counts per H3 cell; aggregated by WORLD-OS to the model resolution.",
+  "files": [
+    {
+      "file": "IND_h3r4.csv",
+      "url": "https://geodata-eu-central-1-kontur-public.s3.amazonaws.com/kontur_datasets/kontur_population_IN_20231101.gpkg.gz",
+      "rows": 1979,
+      "filter": "H3 resolution 8 aggregated to resolution 4",
+      "sha256": "ffb25421b02cca95a4fb8a09b96bf755dff6ac29c03f37717f2ca1506163c0eb"
+    },
+    {
+      "file": "USA_h3r4.csv",
+      "url": "https://geodata-eu-central-1-kontur-public.s3.amazonaws.com/kontur_datasets/kontur_population_US_20231101.gpkg.gz",
+      "rows": 5193,
+      "filter": "H3 resolution 8 aggregated to resolution 4",
+      "sha256": "5c94099e892360d558e40305b8fe7db5d81b56563ca39ca7289a8987324a04b7"
+    },
+    {
+      "file": "DEU_h3r6.csv",
+      "url": "https://geodata-eu-central-1-kontur-public.s3.amazonaws.com/kontur_datasets/kontur_population_DE_20231101.gpkg.gz",
+      "rows": 11489,
+      "filter": "H3 resolution 8 aggregated to resolution 6",
+      "sha256": "ab0883d9bd0c0879cd7238e1eef2188ea48b4ad4c82a385101446c2b512c9cd6"
+    },
+    {
+      "file": "JPN_h3r6.csv",
+      "url": "https://geodata-eu-central-1-kontur-public.s3.amazonaws.com/kontur_datasets/kontur_population_JP_20231101.gpkg.gz",
+      "rows": 11971,
+      "filter": "H3 resolution 8 aggregated to resolution 6",
+      "sha256": "e855e3848a50b55500b0efc962483dddcdec2e34c5a8da113d8e22411b682705"
+    },
+    {
+      "file": "BRA_h3r4.csv",
+      "url": "https://geodata-eu-central-1-kontur-public.s3.amazonaws.com/kontur_datasets/kontur_population_BR_20231101.gpkg.gz",
+      "rows": 4117,
+      "filter": "H3 resolution 8 aggregated to resolution 4",
+      "sha256": "2ed414b412370e2a9df7ae287607fd268cde50ac01fb9d1725cca2a959c5b435"
+    },
+    {
+      "file": "NGA_h3r5.csv",
+      "url": "https://geodata-eu-central-1-kontur-public.s3.amazonaws.com/kontur_datasets/kontur_population_NG_20231101.gpkg.gz",
+      "rows": 4091,
+      "filter": "H3 resolution 8 aggregated to resolution 5",
+      "sha256": "2bf18f65a1a5834a803490a2d483fe2984a5e4ad7fe3250fb88ed8d81e8b6f31"
+    }
+  ]
+}
