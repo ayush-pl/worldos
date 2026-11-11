@@ -1,0 +1,50 @@
+{
+  "source": "UN DESA Population Division, World Population Prospects 2024",
+  "license": "CC BY 3.0 IGO",
+  "retrieved_utc": "2026-11-11T08:03:08+00:00",
+  "notes": "Population in thousands; ASFR per 1000 women; mx/qx per person-year; ages in years.",
+  "files": [
+    {
+      "file": "population_single_age_1950_2023.csv",
+      "url": "https://population.un.org/wpp/assets/Excel%20Files/1_Indicator%20(Standard)/CSV_FILES/WPP2024_Population1JanuaryBySingleAgeSex_Medium_1950-2023.csv.gz",
+      "rows": 20604,
+      "filter": "ISO3 in ['BRA', 'DEU', 'IND', 'JPN', 'NGA', 'USA'], year >= 1990",
+      "sha256": "7154b18f3163fad28695d86876dc3c9b7aa69c2c15e3e53ba9010d01ff8d2c5e"
+    },
+    {
+      "file": "population_single_age_2024_2100_medium.csv",
+      "url": "https://population.un.org/wpp/assets/Excel%20Files/1_Indicator%20(Standard)/CSV_FILES/WPP2024_Population1JanuaryBySingleAgeSex_Medium_2024-2100.csv.gz",
+      "rows": 47268,
+      "filter": "ISO3 in ['BRA', 'DEU', 'IND', 'JPN', 'NGA', 'USA'], year >= 1990",
+      "sha256": "10bce21620968223cde902355617073a1d9ff88affbcdab44b9dfbeda21fdb0c"
+    },
+    {
+      "file": "asfr_single_age.csv",
+      "url": "https://population.un.org/wpp/assets/Excel%20Files/1_Indicator%20(Standard)/CSV_FILES/WPP2024_Fertility_by_Age1.csv.gz",
+      "rows": 23310,
+      "filter": "ISO3 in ['BRA', 'DEU', 'IND', 'JPN', 'NGA', 'USA'], year >= 1990",
+      "sha256": "fa7ef95b3ccac13a6a958999e96dd6ac21695b639c7efd1509236af7fc1bbe38"
+    },
+    {
+      "file": "life_table_female.csv",
+      "url": "https://population.un.org/wpp/assets/Excel%20Files/1_Indicator%20(Standard)/CSV_FILES/WPP2024_Life_Table_Complete_Medium_Female_1950-2023.csv.gz",
+      "rows": 20604,
+      "filter": "ISO3 in ['BRA', 'DEU', 'IND', 'JPN', 'NGA', 'USA'], year >= 1990",
+      "sha256": "12f63410697c58c100c30a0721f5ec98dbda2942a8d9f54d29b0246f1a23ac55"
+    },
+    {
+      "file": "life_table_male.csv",
+      "url": "https://population.un.org/wpp/assets/Excel%20Files/1_Indicator%20(Standard)/CSV_FILES/WPP2024_Life_Table_Complete_Medium_Male_1950-2023.csv.gz",
+      "rows": 20604,
+      "filter": "ISO3 in ['BRA', 'DEU', 'IND', 'JPN', 'NGA', 'USA'], year >= 1990",
+      "sha256": "de2c85154183659715af5d4fbf6db4c603bc0f173fd7a7f4bdb15e439776461d"
+    },
+    {
+      "file": "demographic_indicators.csv",
+      "url": "https://population.un.org/wpp/assets/Excel%20Files/1_Indicator%20(Standard)/CSV_FILES/WPP2024_Demographic_Indicators_Medium.csv.gz",
+      "rows": 672,
+      "filter": "ISO3 in ['BRA', 'DEU', 'IND', 'JPN', 'NGA', 'USA'], year >= 1990",
+      "sha256": "c6d4ba91e6424d4ce5a0c8201132f60d5ea054d2f864256414ca8999bef771e1"
+    }
+  ]
+}

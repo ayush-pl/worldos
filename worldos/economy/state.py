@@ -117,6 +117,9 @@ class Flows:
     corporate_tax: float = 0.0
     births: float = 0.0  # represented persons
     deaths: float = 0.0
+    immigrants: float = 0.0
+    co2_emissions_t: float = 0.0
+    emigrants: float = 0.0
     bankruptcies: int = 0
     entries: int = 0
     hires: float = 0.0

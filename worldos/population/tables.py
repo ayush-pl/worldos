@@ -16,6 +16,7 @@ from worldos.core.table import ColumnTable
 CHILD, STUDENT, EMPLOYED, UNEMPLOYED, INACTIVE, RETIRED = range(6)
 STATUS_NAMES = ["child", "student", "employed", "unemployed", "inactive", "retired"]
 LABOUR_FORCE = (EMPLOYED, UNEMPLOYED)
+EXIT_NONE, EXIT_DEATH, EXIT_EMIGRATION = 0, 1, 2
 
 
 class PersonTable(ColumnTable):
@@ -30,6 +31,7 @@ class PersonTable(ColumnTable):
         "alive": (np.bool_, True),
         "weight": (np.float64, 1.0),
         "birth_tick": (np.int32, 0),
+        "exit_reason": (np.int8, 0),  # 0 present, 1 died, 2 emigrated
     }
 
     def __init__(self, capacity: int = 16) -> None:

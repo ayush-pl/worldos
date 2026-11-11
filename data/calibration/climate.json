@@ -1,0 +1,17 @@
+{
+  "r0": 28.474361829306112,
+  "lambda": 1.13,
+  "lambda_fitted_on_train": 0.5653023953095282,
+  "lambda_prior": 1.13,
+  "lambda_choice": "prior (fitted value failed the out-of-sample test)",
+  "temp_rmse_test_k_fitted": 0.5627333245058668,
+  "ecs_k": 3.283185840707965,
+  "co2_rmse_train_ppm": 1.465573411090655,
+  "co2_rmse_test_ppm": 1.6245891109616788,
+  "co2_2023_sim": 424.09611764551636,
+  "co2_2023_obs": 421.08,
+  "temp_rmse_train_k": 0.12712978316972906,
+  "temp_rmse_test_k": 0.17845448295156563,
+  "temp_2014_2023_sim": 1.4034445245761975,
+  "temp_2014_2023_obs": 1.2081205528235295
+}

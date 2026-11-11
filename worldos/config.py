@@ -165,6 +165,12 @@ class CentralBankConfig(_Model):
     rate_bounds: tuple[float, float] = (0.0, 0.20)
 
 
+class ClimateConfig(_Model):
+    # tCO2 per unit of real output (base-year prices); 0 disables emissions accounting (synthetic default)
+    emissions_intensity: float = Field(0.0, ge=0)
+    decarbonisation_rate: float = Field(0.0, ge=-0.2, le=0.5)  # annual rate of decline of intensity
+
+
 class WorldConfig(_Model):
     simulation: SimulationConfig = Field(default_factory=SimulationConfig)
     geo: GeoConfig = Field(default_factory=GeoConfig)
@@ -174,6 +180,7 @@ class WorldConfig(_Model):
     bank: BankConfig = Field(default_factory=BankConfig)
     government: GovernmentConfig = Field(default_factory=GovernmentConfig)
     central_bank: CentralBankConfig = Field(default_factory=CentralBankConfig)
+    climate: ClimateConfig = Field(default_factory=ClimateConfig)
 
 
 def set_path(obj: Any, path: str, value: Any) -> None:

@@ -1,0 +1,50 @@
+{
+  "source": "Natural Earth 10m cultural vectors (nvkelso/natural-earth-vector)",
+  "license": "Public domain (Natural Earth)",
+  "retrieved_utc": "2026-11-11T08:04:55+00:00",
+  "notes": "",
+  "files": [
+    {
+      "file": "IND.geojson",
+      "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/",
+      "rows": 251,
+      "filter": "IND; 10m admin-0/admin-1 simplified 0.02 deg; populated places",
+      "sha256": "65d20875d82c9319e4ee677e3145a56924a84b7fdf63629421a6138d7d1a9725"
+    },
+    {
+      "file": "USA.geojson",
+      "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/",
+      "rows": 821,
+      "filter": "USA; 10m admin-0/admin-1 simplified 0.02 deg; populated places",
+      "sha256": "63d37f501b4173ede0f3a9f1d3c0e54bbda850add87e68bbd3beb4a17fa52681"
+    },
+    {
+      "file": "DEU.geojson",
+      "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/",
+      "rows": 75,
+      "filter": "DEU; 10m admin-0/admin-1 simplified 0.02 deg; populated places",
+      "sha256": "ce5e8724f969234281f9753860158fa61409498e2dafef70097bb057611467e0"
+    },
+    {
+      "file": "JPN.geojson",
+      "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/",
+      "rows": 117,
+      "filter": "JPN; 10m admin-0/admin-1 simplified 0.02 deg; populated places",
+      "sha256": "d6556f3398c80f40787af684f2c4c62cd961d44309604b53feb6e2f48f420f94"
+    },
+    {
+      "file": "BRA.geojson",
+      "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/",
+      "rows": 420,
+      "filter": "BRA; 10m admin-0/admin-1 simplified 0.02 deg; populated places",
+      "sha256": "ea6101fa2086c172581a766c057d9574d750f5ec7f06069f5cbb6cc9b65dbfd3"
+    },
+    {
+      "file": "NGA.geojson",
+      "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/",
+      "rows": 106,
+      "filter": "NGA; 10m admin-0/admin-1 simplified 0.02 deg; populated places",
+      "sha256": "735c914f0a771b197461cee05e6d75d65101202cac2620c5a88128aa019e9d94"
+    }
+  ]
+}

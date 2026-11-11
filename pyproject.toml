@@ -15,6 +15,7 @@ dependencies = [
     "scipy>=1.11",
     "pydantic>=2.5",
     "h3>=4.0",
+    "shapely>=2.0",
 ]
 
 [project.optional-dependencies]
@@ -27,7 +28,7 @@ worldos = "worldos.cli:main"
 include = ["worldos*"]
 
 [tool.setuptools.package-data]
-worldos = ["data/*.toml"]
+worldos = ["data/*.toml", "countries/*.toml"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

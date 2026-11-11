@@ -4,9 +4,15 @@
 *Observe the Earth. Understand the World. Simulate the Future.*
 
 This repository contains the **specification documents** for WORLD-OS (`docs/`) and **WORLD-OS
-Alpha** (`worldos/`), a working and tested prototype that simulates **one synthetic country**.
+Alpha** (`worldos/`), a working and tested prototype. It simulates either a synthetic country or
+one of **six real countries** (India, USA, Germany, Japan, Brazil, Nigeria) built from real data:
+UN WPP 2024 demography, World Bank WDI macro data, Natural Earth geography, and global climate
+records (Global Carbon Budget, NOAA, HadCRUT5, IPCC AR6). See [docs/11](docs/11-real-data-countries-climate.md),
+[country validation reports](reports/countries/) and the [climate report](reports/climate.md).
 
-> **Scope, stated plainly.** Alpha is *not* a digital twin of Earth. It is the foundation such a
+> **Scope, stated plainly.** Alpha is *not* a digital twin of Earth. Real-country worlds reproduce WPP
+> demography closely, but their economies are simplified (no capital, housing or foreign sector) and
+> calibrated to a single target. It is the foundation such a
 > system needs: a reproducible simulation kernel, a demographic microsimulation, a stock-flow
 > consistent agent-based economy with institutions, a validated action pathway for AI agents, a
 > scenario laboratory with uncertainty, and a provenance-aware data layer. Its parameters are
@@ -38,6 +44,14 @@ python -m worldos experiment examples/experiments/public_spending_increase.toml 
 python -m worldos catalogue
 ```
 
+```bash
+python -m worldos country run IND --months 60 --out results/india
+```
+
+```bash
+python -m worldos climate scenario --net-zero 2060
+```
+
 `run` writes `metrics.csv`, `audit_log.json` (every policy action, accepted or rejected),
 `config.json` and a self-contained `dashboard.html`.
 
@@ -51,8 +65,9 @@ python -m worldos catalogue
 | Economy | firms, households, bank, central bank, government; labour, goods and credit markets; SFC accounting; GDP (two sides), CPI, unemployment, Gini, poverty | multi-sector, capital, housing, trade, FX |
 | Institutions | Taylor-rule central bank, debt-rule fiscal policy, validated through an action kernel with audit | optimisation/RL/LLM policies (interface ready) |
 | Experiments | branch from warm-up, overrides & dated interventions, multi-seed ensembles with common random numbers, paired 95% CIs, markdown report | sensitivity analysis, optimisation |
-| Data | 30-dataset catalogue with licence status, observation store with provenance, CSV ingestion with licence gate | live connectors (WPP, WDI next) |
-| Environment | — | climate, energy, water, agriculture, biodiversity (Phase 3) |
+| Data | 30-dataset catalogue, provenance store, licence-gated ingestion, connectors for WPP, WDI, Natural Earth, climate | Parquet/PostGIS persistence |
+| Real data | WPP, WDI, Natural Earth, GCB/NOAA/HadCRUT5/AR6 extracts with checksums; six calibrated countries | more countries, gridded population, census microdata |
+| Environment | global climate emulator validated out of sample; country CO2 accounting | damages, energy, water, agriculture, biodiversity (Phase 3) |
 
 Performance on one CPU core: 10⁶ person records and 10³ firms take about 0.6 s per simulated month,
 with all accounting invariants checked every month.

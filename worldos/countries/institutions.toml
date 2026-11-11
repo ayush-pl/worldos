@@ -1,0 +1,33 @@
+# Institutional parameters that are not in the committed datasets. Provenance kind: ASSUMED.
+# Values are simplified (one pension age for all; headline inflation target) and should be
+# verified against official sources before any real-world use.
+
+[IND]
+pension_age = 60
+inflation_target = 0.04
+notes = "RBI flexible inflation target 4% (+/-2pp); common formal-sector retirement age 60."
+
+[USA]
+pension_age = 67
+inflation_target = 0.02
+notes = "Social Security full retirement age approaching 67; Federal Reserve 2% PCE goal."
+
+[DEU]
+pension_age = 66
+inflation_target = 0.02
+notes = "Statutory pension age rising from 65 to 67 (about 66 in 2023); ECB 2% target."
+
+[JPN]
+pension_age = 65
+inflation_target = 0.02
+notes = "Public pension eligibility generally 65; Bank of Japan 2% target."
+
+[BRA]
+pension_age = 65
+inflation_target = 0.03
+notes = "2019 reform: 65 men / 62 women (simplified to 65); CMN target 3%."
+
+[NGA]
+pension_age = 60
+inflation_target = 0.075
+notes = "Public-service retirement age 60; CBN has used a 6-9% inflation target band (midpoint). Verify."

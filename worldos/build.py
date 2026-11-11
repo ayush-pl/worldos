@@ -7,6 +7,7 @@ from worldos.core.actions import ActionKernel
 from worldos.core.clock import EventScheduler, SimDate, SimulationClock
 from worldos.core.rng import RandomStreams
 from worldos.core.world import World
+from worldos.climate.emissions import EmissionsEngine
 from worldos.economy.engines import (
     CreditEngine, FirmFinanceEngine, FirmPlanningEngine, GoodsMarketEngine, HouseholdExpectationsEngine,
     IncomeEngine, LabourMarketEngine, ProductionEngine, TechnologyEngine,
@@ -51,6 +52,6 @@ def build_world(config: WorldConfig | None = None, seed: int = 0) -> World:
 def default_engines() -> list:
     return [
         DemographyEngine(), TechnologyEngine(), FirmPlanningEngine(), CreditEngine(), LabourMarketEngine(),
-        ProductionEngine(), IncomeEngine(), GoodsMarketEngine(), FirmFinanceEngine(),
+        ProductionEngine(), EmissionsEngine(), IncomeEngine(), GoodsMarketEngine(), FirmFinanceEngine(),
         HouseholdExpectationsEngine(), CentralBankEngine(), GovernmentPolicyEngine(), MetricsEngine(),
     ]

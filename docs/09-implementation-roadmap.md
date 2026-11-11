@@ -9,9 +9,9 @@ change them. Each milestone has acceptance tests that must pass before the next 
 |---|---|---|---|
 | M0 | Kernel: clock, scheduler, RNG streams, columnar tables, action kernel, provenance | ✅ | `tests/test_core.py` |
 | M1 | Synthetic one-country world: geography, population, SFC economy, institutions, scenario lab, validation suite, CLI, HTML dashboard | ✅ | full pytest suite; `worldos validate` all PASS; 10⁶ records < 1 s/month |
-| M2 | Data connectors: UN WPP, World Bank WDI; observation store persisted (Parquet/PostGIS) | ⏳ | checksummed raw files; provenance complete on 100% of observations; licence gate tested |
-| M3 | Real-country population: demographic schedules fitted to WPP (fit error recorded); households fitted to census marginals (IPF) | ⏳ | micro vs WPP age-sex structure TVD < 0.02 at base year; 10-year projection within WPP 80% interval |
-| M4 | Calibration v1: moment matching / SBI of economic parameters to national accounts and labour statistics | ⏳ | target moments inside tolerance; posterior predictive checks; parameter identifiability report |
+| M2 | Data connectors: UN WPP, World Bank WDI, Natural Earth, climate records; checksummed extracts | ✅ (persistence in Parquet/PostGIS still ⏳) | checksummed raw files; provenance complete on 100% of observations; licence gate tested |
+| M3 | Real-country population from WPP (empirical schedules, residual migration); hindcast and projection benchmarks | ✅ six countries (household fitting to census marginals still ⏳) | micro vs WPP age-sex structure TVD < 0.02 at base year; 10-year projection within WPP 80% interval |
+| M4 | Calibration v1: moment matching / SBI of economic parameters to national accounts and labour statistics | ◐ one-parameter calibration to unemployment + untargeted-moment reports | target moments inside tolerance; posterior predictive checks; parameter identifiability report |
 | M5 | API + run store + run manifests; minimal web dashboard | ⏳ | reproduce any stored run bit-for-bit from its manifest |
 
 ## Phase 2 — Economic civilisation (6–12)
@@ -23,6 +23,8 @@ tax-benefit system from OECD parameters; labour market with regional commuting.
 distribution, investment volatility > consumption volatility, procyclical credit).
 
 ## Phase 3 — Environmental integration (12–24)
+
+*Started:* climate emulator validated against observations; territorial CO2 accounting in country economies (docs/11).
 
 Emissions accounting per sector; simple climate model coupling (FaIR-type) for global temperature;
 energy engine (generation mix, dispatch, prices); agriculture with yield emulators; water balance;
@@ -55,9 +57,9 @@ coupling via external products; billion-person representation using L2/L3 levels
 Testing (unit, property, statistical, regression on golden runs) · benchmarking (records/s per
 engine) · security & governance (RBAC, audit, ethics review) · documentation of assumptions.
 
-## Immediate next three tasks
+## Immediate next tasks
 
-1. **M2 connectors** for UN WPP and WDI, with cached raw downloads and provenance.
-2. **Global sensitivity analysis** of the Alpha economy (Morris screening over ~40 parameters) to
-   find which assumptions drive outcomes.
-3. **Capital and investment** (needed for a working monetary transmission channel).
+1. **Capital and investment** (closes the consumption-share gap and gives monetary policy a channel).
+2. **Multi-moment calibration** (simulation-based inference over ~10 parameters; targets incl. Gini, inflation).
+3. **Global sensitivity analysis** (Morris screening) of real-country worlds.
+4. **Gridded population** (WorldPop/GHSL) for spatial allocation; **energy engine** behind emissions.

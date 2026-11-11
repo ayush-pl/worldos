@@ -1,0 +1,36 @@
+{
+  "source": "Global Carbon Budget (via OWID), NOAA GML, Met Office HadCRUT5",
+  "license": "mixed: see files",
+  "retrieved_utc": "2026-11-11T08:13:15+00:00",
+  "notes": "",
+  "files": [
+    {
+      "file": "emissions_owid_gcb.csv",
+      "url": "https://raw.githubusercontent.com/owid/co2-data/master/owid-co2-data.csv",
+      "rows": 1890,
+      "license": "CC BY 4.0",
+      "filter": "World + ['BRA', 'DEU', 'IND', 'JPN', 'NGA', 'USA']; CO2 in MtCO2/yr",
+      "sha256": "42f85998efe6269d49f75870a7398a4750a8aeeb3ae2e8b7596d520164328baf"
+    },
+    {
+      "file": "co2_mauna_loa_annual.csv",
+      "url": "https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_annmean_mlo.csv",
+      "license": "US Government work (public domain)",
+      "sha256": "515f68014b54fd4603a11942c29757aed4d5d59a2e728d04d61fb1c1586a7e00"
+    },
+    {
+      "file": "hadcrut5_global_annual.csv",
+      "url": "https://www.metoffice.gov.uk/hadobs/hadcrut5/data/HadCRUT.5.0.2.0/analysis/diagnostics/HadCRUT.5.0.2.0.analysis.summary_series.global.annual.csv",
+      "license": "Open Government Licence v3",
+      "filter": "anomaly relative to 1961-1990",
+      "sha256": "a1441ab5aef8f3baf43cca417bca271f6d674d4f235ea01129f0432c948882e0"
+    },
+    {
+      "file": "ar6_erf_1750_2019.csv",
+      "url": "https://raw.githubusercontent.com/IPCC-WG1/Chapter-7/main/data_output/AR6_ERF_1750-2019.csv",
+      "license": "CC BY 4.0 (data); MIT (repository code)",
+      "filter": "effective radiative forcing, W m-2, by agent",
+      "sha256": "420e5b0bb96d6b19eed6bf1f1e890bf6f9e8548f29b6600c628c80a7e66ed63e"
+    }
+  ]
+}

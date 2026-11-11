@@ -107,5 +107,9 @@ def compute_metrics(world) -> dict:
         "gini_wealth": gini(wealth, h.weight[hh]),
         "poverty_rate": float(person_w[eq_income < 0.6 * median_eq].sum() / person_w.sum()) if len(hh) else float("nan"),
         "median_equivalised_income": median_eq,
+        "immigrants": fl.immigrants,
+        "emigrants": fl.emigrants,
+        "co2_mt_annualised": 12 * fl.co2_emissions_t / 1e6,
+        "co2_intensity": world.emissions_intensity or 0.0,
         "retired_share": float(w[alive & (p.status == RETIRED)].sum()) / pop if pop else float("nan"),
     }
