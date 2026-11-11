@@ -10,6 +10,8 @@ validation (docs/05-population-and-agents.md, section "Strategic agents").
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+
+import numpy as np
 from typing import Any, Protocol
 
 from worldos.config import CentralBankConfig, GovernmentConfig
@@ -50,18 +52,25 @@ class TaylorRulePolicy:
 
 @dataclass
 class FiscalRulePolicy:
-    """Debt-stabilising tax rule: adjust the income tax rate in proportion to the debt-ratio gap."""
+    """Fiscal reaction function: the income tax rate responds to the debt-ratio gap (debt stabilisation,
+    cf. Bohn 1998) and to the inflation gap (counter-cyclical stance), with a per-decision cap."""
 
     cfg: GovernmentConfig
     actor: str = "government"
+    inflation_target: float = 0.02
 
     def decide(self, obs: dict[str, Any]) -> Action | None:
         ratio, current = obs.get("gov_debt_to_gdp"), obs["income_tax_rate"]
         if ratio is None:
             return None
         c = self.cfg
-        delta = max(-c.max_tax_change, min(c.max_tax_change, c.fiscal_adjustment * (ratio - c.debt_target)))
+        pi = obs.get("inflation_yoy")
+        infl_gap = 0.0 if pi is None else pi - self.inflation_target
+        gap = ratio - c.debt_target
+        gap = 0.0 if abs(gap) <= c.debt_tolerance else gap - np.sign(gap) * c.debt_tolerance
+        raw = c.fiscal_adjustment * gap + c.fiscal_inflation_response * infl_gap
+        delta = max(-c.max_tax_change, min(c.max_tax_change, raw))
         lo, hi = c.tax_rate_bounds
         new = min(max(current + delta, lo), hi)
         return Action("set_income_tax_rate", self.actor, {"income_tax_rate": round(new, 6)}, DecisionSource.RULE,
-                      rationale=f"debt/GDP={ratio:.3f} vs target {c.debt_target:.3f}")
+                      rationale=f"debt/GDP={ratio:.3f} vs target {c.debt_target:.3f}; inflation gap {infl_gap:+.4f}")

@@ -69,6 +69,7 @@ def economy_moments(iso3: str, seeds=(1, 2, 3), months: int = 60, n_records: int
             "unemployment_rate": df.unemployment_rate.mean(),
             "household_consumption_share_gdp": (df.consumption / df.gdp_nominal).mean(),
             "government_consumption_share_gdp": (df.gov_purchases / df.gdp_nominal).mean(),
+            "investment_share_gdp": (df.investment / df.gdp_nominal).mean(),
             "cpi_inflation": df.inflation_yoy.dropna().mean(),
             "employment_to_population_15plus": np.nan,
             "real_gdp_growth": (df.gdp_real.iloc[-12:].sum() / df.gdp_real.iloc[:12].sum()) ** (1 / ((len(df) - 12) / 12)) - 1,
@@ -80,6 +81,7 @@ def economy_moments(iso3: str, seeds=(1, 2, 3), months: int = 60, n_records: int
         "unemployment_rate": sources.wdi_value(iso3, "unemployment_rate_ilo", 2023),
         "household_consumption_share_gdp": sources.wdi_value(iso3, "household_consumption_share_gdp", 2023),
         "government_consumption_share_gdp": sources.wdi_value(iso3, "government_consumption_share_gdp", 2023),
+        "investment_share_gdp": sources.wdi_value(iso3, "gross_capital_formation_share_gdp", 2023),
         "cpi_inflation": sources.wdi_series(iso3, "cpi_inflation").loc[2014:2023].mean(),
         "real_gdp_growth": sources.wdi_series(iso3, "gdp_real_growth").loc[2014:2023].mean(),
         "gini_income": sources.wdi_value(iso3, "gini_index", 2023, lookback=10),
@@ -90,7 +92,7 @@ def economy_moments(iso3: str, seeds=(1, 2, 3), months: int = 60, n_records: int
     for k, v in obs.items():
         o = None if v is None or pd.isna(v) else v / scale.get(k, 100)
         rows.append({"moment": k, "targeted": k in ("unemployment_rate", "government_consumption_share_gdp",
-                                                    "gdp_per_capita_usd"),
+                                                    "investment_share_gdp", "gdp_per_capita_usd"),
                      "observed": o, "model_mean": model[k].mean(), "model_sd": model[k].std(ddof=1)})
     return pd.DataFrame(rows)
 
@@ -127,8 +129,9 @@ def render_report(iso3: str, hindcast: pd.DataFrame, projection: pd.DataFrame, e
         o = "n/a" if r.observed is None or pd.isna(r.observed) else f"{r.observed:.4g}"
         L.append(f"| {r.moment} | {'yes' if r.targeted else 'no'} | {o} | {r.model_mean:.4g} ± {r.model_sd:.2g} |")
     L += ["", "### Reading the economic comparison", "",
-          "- Alpha has no investment, housing or foreign sector, so household + government consumption must equal "
-          "~100% of model GDP; the real household consumption share is lower. This gap is structural, not a calibration error.",
+          "- The model has business investment but no foreign sector, so C + I + G = 100% of model GDP; with a trade "
+          "deficit or surplus the real shares differ accordingly. Observed investment (gross capital formation) also "
+          "includes housing and public investment.",
           "- The Gini comparison is indicative only: WDI Ginis mix income and consumption surveys, and the model "
           "lacks within-record heterogeneity and capital income dispersion.",
           "- Growth in the model is the productivity trend plus labour-force change; it is not fitted to GDP growth.", ""]

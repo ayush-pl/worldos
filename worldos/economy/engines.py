@@ -14,9 +14,9 @@ Monthly sequence (engine order):
   20 planning   firms update demand expectations, prices, wage offers, labour demand
   30 credit     firms finance planned wage bills; bank rations by capital
   40 labour     separations, firing of excess staff, search & matching
-  50 production output = productivity x effective labour (Leontief, labour only)
+  50 production output = min(productivity x effective labour, kappa x capital); depreciation
   60 income     wages, income tax, benefits, pensions, deposit interest
-  70 goods      household and government purchases with search and rationing
+  70 goods      household, firm-investment and government purchases with rationing
   80 finance    debt service, corporate tax, dividends, bankruptcy, entry
   85 expect.    households update expected income
 """
@@ -58,6 +58,21 @@ def mean_wage_per_worker(world) -> float:
     return float(np.average(w, weights=p.weight[emp]))
 
 
+def capital_productivity(world) -> float:
+    """kappa: monthly output per unit of capital at full utilisation."""
+    ec = world.config.economy
+    return 1.0 / (12.0 * ec.capital_output_ratio * ec.target_utilisation)
+
+
+def capital_value(world, idx=slice(None)) -> np.ndarray:
+    return world.firms.capital[idx] * average_price(world)
+
+
+def firm_net_worth(world, idx) -> np.ndarray:
+    f = world.firms
+    return f.deposits[idx] + f.inventory[idx] * f.unit_cost()[idx] + capital_value(world, idx) - f.loans[idx]
+
+
 def average_price(world) -> float:
     f = world.firms
     a = f.alive
@@ -91,21 +106,38 @@ class FirmPlanningEngine(Engine):
         new_exp = np.where(short & (price >= pbar), base * (1 + uq), np.where(glut & (price <= pbar), base * (1 - uq), base))
         markup = f.markup[a]
         markup = np.where(short & (price < pbar), markup + um, np.where(glut & (price > pbar), markup - um, markup))
+        markup += ec.markup_reversion * (ec.initial_markup - markup)  # competitive pressure anchors markups
         lo, hi = ec.markup_bounds
         f.markup[a] = np.clip(markup, lo, hi)
-        # Wage norm (cf. Dosi et al. 2010): partial indexation to positive past inflation plus trend
+        # Wage norm (cf. Dosi et al. 2010): indexation to positive past inflation and the anchored target, plus trend
         # productivity growth; firm-specific adjustment to vacancy (Lengnick 2013) and layoff signals,
         # with downward nominal rigidity (cuts are scaled down).
-        norm = ec.wage_indexation * max(recent_monthly_inflation(world), 0.0) \
+        # expectations: weight wage_indexation on past inflation, the rest anchored on the CB target
+        target_m = world.config.central_bank.inflation_target / 12
+        norm = ec.wage_indexation * max(recent_monthly_inflation(world), 0.0) + (1 - ec.wage_indexation) * target_m \
             + ec.wage_productivity_passthrough * ec.productivity_growth / 12
         wage = f.wage_offer[a] * (1 + norm)
         wage = np.where(f.unfilled[a] > EPS, wage * (1 + uw),
                         np.where(f.fired[a], wage * (1 - ec.downward_wage_flexibility * uw), wage))
         f.wage_offer[a] = wage
-        f.price[a] = (1 + f.markup[a]) * wage / f.productivity[a]  # cost-plus pricing
+        # full-cost pricing: labour cost + depreciation per unit of output at normal utilisation
+        f.capital_cost[a] = ec.depreciation_rate * ec.capital_output_ratio * pbar
+        f.price[a] = (1 + f.markup[a]) * (wage / f.productivity[a] + f.capital_cost[a])
         f.exp_demand[a] = new_exp
-        f.target_output[a] = np.maximum(0.0, new_exp * (1 + ec.inventory_buffer) - inv)
+        kappa = capital_productivity(world)
+        capacity = kappa * f.capital[a]
+        f.target_output[a] = np.minimum(np.maximum(0.0, new_exp * (1 + ec.inventory_buffer) - inv), capacity)
         f.labour_demand[a] = f.target_output[a] / f.productivity[a]
+        # Investment: replacement + partial adjustment towards desired capital (flexible accelerator),
+        # scaled by the gap between the return on capital and the loan rate.
+        sm = ec.investment_demand_smoothing
+        f.normal_demand[a] = (1 - sm) * f.normal_demand[a] + sm * sales
+        desired = f.normal_demand[a] / (kappa * ec.target_utilisation)
+        k_value = np.maximum(f.capital[a] * pbar, EPS)
+        r_profit = 12 * f.profit[a] / k_value
+        m = np.clip(1 + ec.investment_rate_sensitivity * (r_profit - f.loan_rate[a]), 0.0, 2.0)
+        units = m * np.maximum(0.0, ec.depreciation_rate / 12 * f.capital[a] + ec.investment_adjustment * (desired - f.capital[a]))
+        f.invest_budget[a] = units * pbar
 
 
 class CreditEngine(Engine):
@@ -118,14 +150,16 @@ class CreditEngine(Engine):
         if not len(a):
             return
         policy = world.central_bank.policy_rate
-        nw = f.deposits[a] + f.inventory[a] * f.unit_cost()[a] - f.loans[a]
+        nw = firm_net_worth(world, a)
         leverage = f.loans[a] / np.maximum(f.loans[a] + np.maximum(nw, 0.0), EPS)
         f.loan_rate[a] = policy + bc.loan_spread + bc.risk_premium * np.clip(leverage, 0, 1)
         debt_service = f.loans[a] * (f.loan_rate[a] / 12 + 1 / bc.amortization_months)
         planned_bill = f.wage_offer[a] * f.labour_demand[a]
-        need = np.maximum(0.0, planned_bill + debt_service - f.deposits[a])
+        need = np.maximum(0.0, planned_bill + debt_service + f.invest_budget[a] - f.deposits[a])
         revenue_base = np.maximum(f.sales_value[a], f.price[a] * f.exp_demand[a])
-        firm_cap = np.maximum(0.0, bc.max_debt_to_sales_months * revenue_base - f.loans[a])
+        debt_limit = np.maximum(bc.max_debt_to_sales_months * revenue_base,
+                                world.config.economy.max_debt_to_capital * capital_value(world, a))
+        firm_cap = np.maximum(0.0, debt_limit - f.loans[a])
         request = np.minimum(need, firm_cap)
         capacity = bank_lending_capacity(world)
         total = float(request.sum())
@@ -136,6 +170,9 @@ class CreditEngine(Engine):
         # firms that remain short of finance scale down planned hiring
         affordable = np.maximum(0.0, f.deposits[a] - debt_service) / f.wage_offer[a]
         f.labour_demand[a] = np.minimum(f.labour_demand[a], affordable)
+        # investment only from funds left after wages and debt service (wages have priority)
+        spare = np.maximum(0.0, f.deposits[a] - debt_service - f.wage_offer[a] * f.labour_demand[a])
+        f.invest_budget[a] = np.minimum(f.invest_budget[a], spare)
 
 
 class LabourMarketEngine(Engine):
@@ -212,11 +249,18 @@ class ProductionEngine(Engine):
     order = 50
 
     def step(self, world) -> None:
-        f = world.firms
-        out = np.where(f.alive, f.productivity * effective_labour(world), 0.0)
+        f, ec, fl = world.firms, world.config.economy, world.flows
+        capacity = capital_productivity(world) * f.capital
+        out = np.where(f.alive, np.minimum(f.productivity * effective_labour(world), capacity), 0.0)
         f.output_units = out
         f.inventory += out
-        world.flows.units_produced = float(out.sum())
+        fl.units_produced = float(out.sum())
+        # depreciation of installed capital (all slots: capital survives firm turnover)
+        dep = f.capital * ec.depreciation_rate / 12
+        f.capital -= dep
+        f.depreciation_value = dep * average_price(world)
+        fl.depreciation_units = float(dep.sum())
+        fl.depreciation_value = float(f.depreciation_value.sum())
 
 
 class IncomeEngine(Engine):
@@ -282,7 +326,12 @@ class GoodsMarketEngine(Engine):
         f.sales_value = 0.0
 
         buyers = np.flatnonzero(h.alive & (h.n_members > 0))
-        budget = ec.consumption_income_propensity * np.maximum(h.income_exp[buyers], 0.0) \
+        cb = world.config.central_bank
+        real_deposit_rate = max(0.0, world.central_bank.policy_rate - world.config.bank.deposit_markdown) \
+            - 12 * recent_monthly_inflation(world)
+        c_y = float(np.clip(ec.consumption_income_propensity
+                            - ec.consumption_rate_sensitivity * (real_deposit_rate - cb.neutral_real_rate), 0.5, 1.0))
+        budget = c_y * np.maximum(h.income_exp[buyers], 0.0) \
             + ec.consumption_wealth_propensity * np.maximum(h.deposits[buyers], 0.0)
         budget = np.clip(budget, 0.0, np.maximum(h.deposits[buyers], 0.0))
         spent = np.zeros(len(buyers))
@@ -310,6 +359,30 @@ class GoodsMarketEngine(Engine):
         h.consumption_last = 0.0
         h.consumption_last[buyers] = spent
         fl.consumption = float(spent.sum())
+
+        # investment goods: each investing firm's budget is spread over sellers in proportion to their stock
+        f.investment_units = 0.0
+        f.investment_value = 0.0
+        inv_budget = np.where(f.alive, f.invest_budget, 0.0)
+        total_inv = float(inv_budget.sum())
+        stock_value = np.where(f.alive, f.inventory * f.price, 0.0)
+        total_stock = float(stock_value.sum())
+        if total_inv > EPS and total_stock > EPS:
+            fill = min(1.0, total_stock / total_inv)
+            spend = inv_budget * fill  # per buyer
+            seller_share = stock_value / total_stock
+            sales = spend.sum() * seller_share  # per seller (value)
+            units_sold = sales / np.where(f.price > 0, f.price, 1.0)
+            ledger.settle_between_firms(world, spend, sales)
+            f.inventory = np.maximum(f.inventory - units_sold, 0.0)
+            f.sales_units += units_sold
+            f.sales_value += sales
+            avg_unit_price = sales.sum() / max(units_sold.sum(), EPS)
+            f.investment_value = spend
+            f.investment_units = spend / avg_unit_price
+            f.capital += f.investment_units
+            fl.investment = float(spend.sum())
+            fl.investment_units = float(units_sold.sum())
 
         # public consumption, spread over firms in proportion to available stock
         g_budget = world.government.spending_share * reference_monthly_gdp(world)
@@ -374,13 +447,13 @@ class FirmFinanceEngine(Engine):
         f.distressed[a] |= (int_paid + prin_paid) < (interest + principal) - 1e-9
 
         # profit, tax, dividends
-        profit = f.sales_value[a] - f.wage_bill[a] - int_paid + f.deposit_interest[a]
+        profit = f.sales_value[a] - f.wage_bill[a] - int_paid + f.deposit_interest[a] - f.depreciation_value[a]
         f.profit[a] = profit
         tax = np.minimum(gov.corporate_tax_rate * np.maximum(profit, 0.0), np.maximum(f.deposits[a], 0.0))
         fl.corporate_tax = ledger.firms_pay_government(world, a, tax)
         buffer = ec.liquidity_buffer_months * f.wage_bill[a] + f.loans[a] * (f.loan_rate[a] / 12 + 1 / bc.amortization_months)
         # dividends come out of after-tax profit, never out of borrowed funds or required liquidity
-        net_worth = f.deposits[a] + f.inventory[a] * f.unit_cost()[a] - f.loans[a]
+        net_worth = firm_net_worth(world, a)
         distributable = np.minimum.reduce([profit - tax, f.deposits[a] - buffer, net_worth - buffer])
         div = ec.dividend_payout * np.maximum(0.0, distributable)
         per_firm = np.zeros(len(f))
@@ -403,7 +476,7 @@ class FirmFinanceEngine(Engine):
     def _bankruptcies(world) -> None:
         f, p, fl = world.firms, world.persons, world.flows
         a = np.flatnonzero(f.alive)
-        nw = f.deposits[a] + f.inventory[a] * f.unit_cost()[a] - f.loans[a]
+        nw = firm_net_worth(world, a)
         bust = a[f.distressed[a] | (nw < 0)]
         if not len(bust):
             return
@@ -441,11 +514,15 @@ class FirmFinanceEngine(Engine):
         new = ready[:n]
         f.alive[new] = True
         f.age_m[new] = 0
+        # an entrant takes over the slot's existing capital (assets survive restructuring); any further
+        # capital must be bought through investment, so capital is never created outside the goods market
         f.wage_offer[new] = wage
         f.productivity[new] = float(np.mean(f.productivity[alive]))
         f.markup[new] = float(np.median(f.markup[alive]))
-        f.price[new] = (1 + f.markup[new]) * wage / f.productivity[new]
+        f.capital_cost[new] = float(np.median(f.capital_cost[alive]))
+        f.price[new] = (1 + f.markup[new]) * (wage / f.productivity[new] + f.capital_cost[new])
         f.exp_demand[new] = 0.5 * float(np.median(f.exp_demand[alive]))
+        f.normal_demand[new] = f.exp_demand[new]
         f.inventory[new] = 0.0
         f.unfilled[new] = 0.0
         f.fired[new] = False

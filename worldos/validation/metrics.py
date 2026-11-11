@@ -1,7 +1,7 @@
 """Monthly indicator computation (the system's published statistics).
 
 Definitions:
-* GDP (expenditure) = C + G + change in inventories valued at unit cost.
+* GDP (expenditure) = C + I + G + change in inventories valued at full unit cost.
   GDP (income) = wages + operating surplus; both are reported and must agree.
 * Real GDP: units produced (single-good economy; base-period prices = 1 unit).
 * CPI: unit value of all final sales (Paasche-type for one good).
@@ -19,7 +19,7 @@ from __future__ import annotations
 import numpy as np
 
 from worldos.core.engine import Engine
-from worldos.economy.engines import mean_wage_per_worker
+from worldos.economy.engines import capital_productivity, firm_net_worth, mean_wage_per_worker
 from worldos.population.tables import EMPLOYED, RETIRED, UNEMPLOYED
 from worldos.validation.stats import gini, weighted_quantile
 
@@ -45,7 +45,7 @@ def compute_metrics(world) -> dict:
     working_age = float(w[alive & (age_y >= 15) & (age_y < 65)].sum())
     old = float(w[alive & (age_y >= 65)].sum())
 
-    gdp_exp = fl.consumption + fl.gov_purchases + fl.inventory_change_value
+    gdp_exp = fl.consumption + fl.investment + fl.gov_purchases + fl.inventory_change_value
     op_surplus = fl.firm_revenue - fl.wages_paid + fl.inventory_change_value
     gdp_inc = fl.wages_paid + op_surplus
     prev = world.metrics
@@ -59,7 +59,9 @@ def compute_metrics(world) -> dict:
     eq_income = (h.income_last[hh] / h.weight[hh]) / np.sqrt(size)
     person_w = size * h.weight[hh]
     median_eq = weighted_quantile(eq_income, person_w, 0.5)
-    firm_nw = float(np.maximum(0.0, f.deposits + f.inventory * f.unit_cost() - f.loans)[f.alive].sum())
+    alive_f = np.flatnonzero(f.alive)
+    firm_nw = float(np.maximum(0.0, firm_net_worth(world, alive_f)).sum())
+    capacity = capital_productivity(world) * f.capital[f.alive].sum()
     wealth = (h.deposits[hh] - h.loans[hh] + h.equity_share[hh] * (firm_nw + max(bank.equity, 0.0))) / h.weight[hh]
     loans = float(f.loans[f.alive].sum() + h.loans[h.alive].sum())
 
@@ -82,6 +84,12 @@ def compute_metrics(world) -> dict:
         "gdp_real": fl.units_produced,
         "gdp_per_capita_annualised": 12 * gdp_exp / pop if pop else float("nan"),
         "consumption": fl.consumption,
+        "investment": fl.investment,
+        "investment_share_gdp": fl.investment / gdp_exp if gdp_exp else float("nan"),
+        "consumption_share_gdp": fl.consumption / gdp_exp if gdp_exp else float("nan"),
+        "capital_stock": float(f.capital[f.alive].sum()),
+        "capacity_utilisation": fl.units_produced / capacity if capacity > 0 else float("nan"),
+        "labour_share": fl.wages_paid / gdp_exp if gdp_exp else float("nan"),
         "gov_purchases": fl.gov_purchases,
         "inventory_change_value": fl.inventory_change_value,
         "wages": fl.wages_paid,

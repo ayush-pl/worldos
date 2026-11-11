@@ -33,6 +33,7 @@ from worldos.economy.state import BankState, CentralBankState, FirmTable, Govern
 from worldos.institutions.actions import register_default_actions
 from worldos.institutions.policies import FiscalRulePolicy, TaylorRulePolicy
 from worldos.population.synthesis import synthesize_population
+from worldos.build import neutral_debt_target  # noqa: F401 (re-exported)
 
 
 @dataclass
@@ -51,6 +52,13 @@ class CountryInfo:
     geography: dict
     parameters: list[ParameterRecord] = field(default_factory=list)
     calibration: dict = field(default_factory=dict)
+
+
+def unit_price_factor(cfg: WorldConfig) -> float:
+    """Initial price per unit of output relative to unit labour cost (full-cost pricing fixed point)."""
+    ec = cfg.economy
+    mu, dky = ec.initial_markup, ec.depreciation_rate * ec.capital_output_ratio
+    return (1 + mu) / (1 - (1 + mu) * dky)
 
 
 def _owid_co2(iso3: str):
@@ -114,11 +122,11 @@ def country_config(iso3: str, base_year: int, n_records: int, n_firms: int,
     epop = wdi("employment_to_population_15plus")
     if gdp is not None and epop is not None:
         employed = epop / 100 * (pf + pm)[15:].sum()
-        base_cfg = WorldConfig()
+        base_cfg = apply_overrides(WorldConfig(), overrides or {})
         mean_h = float(np.dot(base_cfg.population.education_distribution, base_cfg.economy.education_productivity))
-        w0 = gdp / employed / 12 / (1 + base_cfg.economy.initial_markup) / mean_h
+        w0 = gdp / employed / 12 / unit_price_factor(base_cfg) / mean_h
         put("economy.initial_wage", w0, ValueKind.INFERRED, "WDI GDP (constant 2015 USD) per employed person, monthly")
-        put("economy.initial_productivity", w0, ValueKind.INFERRED, "set equal to wage: price ~ (1+markup) USD per good")
+        put("economy.initial_productivity", w0, ValueKind.INFERRED, "set equal to wage: one good costs ~1 USD of labour")
     gpe = sources.wdi_series(iso3, "gdp_per_person_employed_ppp_2021")
     gpe = gpe[(gpe.index <= base_year) & (gpe.index >= base_year - 10)]
     if len(gpe) >= 5:
@@ -128,7 +136,7 @@ def country_config(iso3: str, base_year: int, n_records: int, n_firms: int,
     # emissions: intensity per unit of real output
     co2 = _owid_co2(iso3)
     if gdp is not None and base_year in co2.index:
-        unit_price = 1 + WorldConfig().economy.initial_markup  # base-year USD value of one unit of output
+        unit_price = unit_price_factor(apply_overrides(WorldConfig(), overrides or {}))  # USD per unit of output
         intensity = co2.loc[base_year] * 1e6 / gdp * unit_price
         put("climate.emissions_intensity", intensity, ValueKind.INFERRED,
             "GCB fossil CO2 (via OWID) / WDI GDP constant 2015 USD, base year, per unit of real output")
@@ -159,11 +167,17 @@ def build_country_world(iso3: str, base_year: int = 2023, n_records: int = 40_00
         calib = load_calibration(iso3)
         if calib is not None:
             overrides["government.income_tax_rate"] = calib["income_tax_rate"]
+            if calib.get("capital_output_ratio") and "economy.capital_output_ratio" not in overrides:
+                overrides["economy.capital_output_ratio"] = calib["capital_output_ratio"]
     cfg, recs = country_config(iso3, base_year, n_records, n_firms, overrides)
     if calib is not None:
         recs.append(ParameterRecord("government.income_tax_rate", calib["income_tax_rate"], ValueKind.ASSUMED,
                                     f"CALIBRATED to WDI unemployment {calib['target_unemployment']:.4f} "
                                     f"(achieved {calib['achieved_unemployment']:.4f})"))
+        if calib.get("capital_output_ratio"):
+            recs.append(ParameterRecord("economy.capital_output_ratio", calib["capital_output_ratio"], ValueKind.ASSUMED,
+                                        f"CALIBRATED to WDI investment share {calib['target_investment_share']:.4f} "
+                                        f"(achieved {calib['achieved_investment_share']:.4f})"))
     rng = RandomStreams(seed)
     urban = sources.wdi_value(iso3, "urban_population_share", base_year)
     urban_share = (urban / 100) if urban is not None else 0.5
@@ -184,18 +198,8 @@ def build_country_world(iso3: str, base_year: int = 2023, n_records: int = 40_00
     world.demographic_rates = rates
     initialize_economy(world, rng.get("init.economy"))
     world.strategic_agents = {"central_bank": TaylorRulePolicy(cfg.central_bank),
-                              "government": FiscalRulePolicy(cfg.government)}
+                              "government": FiscalRulePolicy(cfg.government, inflation_target=cfg.central_bank.inflation_target)}
     name = geo[iso3.lower()].name
     world.country = CountryInfo(iso3, name, base_year, geo_info, recs, calib or {})
     neutral_debt_target(world)
     return world
-
-
-def neutral_debt_target(world) -> float:
-    """Set the fiscal rule's debt target to the model's initial debt ratio (rule starts neutral)."""
-    f = world.firms
-    annual_gdp = 12 * float((f.price * f.exp_demand)[f.alive].sum())
-    ratio = world.government.debt / annual_gdp
-    world.config.government.debt_target = round(ratio, 4)
-    world.strategic_agents["government"].cfg = world.config.government
-    return ratio

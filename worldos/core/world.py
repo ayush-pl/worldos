@@ -55,4 +55,5 @@ class World:
         self.households.income_cur = 0.0
         f = self.firms
         self.flows.inventory_start_units = float(f.inventory[f.alive].sum())
+        self.flows.capital_start_units = float(f.capital.sum())
         f.distressed = False

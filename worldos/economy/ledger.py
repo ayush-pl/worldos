@@ -38,6 +38,15 @@ def firms_pay_households(world, firms: np.ndarray, hh: np.ndarray, amounts: np.n
     return total
 
 
+def settle_between_firms(world, paid: np.ndarray, received: np.ndarray) -> float:
+    """Net settlement of inter-firm purchases (per-firm vectors). Totals must match: money is only moved."""
+    total = _total(paid)
+    if abs(total - _total(received)) > 1e-9 * max(1.0, total):
+        raise ValueError("inter-firm settlement does not balance")
+    world.firms.deposits += received - paid
+    return total
+
+
 def distribute_to_owners(world, payer: str, amount: float, firm_amounts: np.ndarray | None = None) -> np.ndarray:
     """Pay ``amount`` to households pro rata to their equity shares.
 

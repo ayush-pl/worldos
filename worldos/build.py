@@ -44,9 +44,20 @@ def build_world(config: WorldConfig | None = None, seed: int = 0) -> World:
     initialize_economy(world, rng.get("init.economy"))
     world.strategic_agents = {
         "central_bank": TaylorRulePolicy(config.central_bank),
-        "government": FiscalRulePolicy(config.government),
+        "government": FiscalRulePolicy(config.government, inflation_target=config.central_bank.inflation_target),
     }
+    neutral_debt_target(world)
     return world
+
+
+def neutral_debt_target(world) -> float:
+    """Set the fiscal rule's debt target to the initial debt ratio, so the rule starts neutral."""
+    f = world.firms
+    annual_gdp = 12 * float((f.price * f.exp_demand)[f.alive].sum())
+    ratio = world.government.debt / annual_gdp
+    world.config.government.debt_target = round(ratio, 4)
+    world.strategic_agents["government"].cfg = world.config.government
+    return ratio
 
 
 def default_engines() -> list:

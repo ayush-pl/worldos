@@ -16,13 +16,14 @@ Geography: Natural Earth; H3 resolution 6, 10937 cells, 16 admin-1 regions, 40 c
 | `economy.initial_unemployment` | 0.03071 | estimated | WDI SL.UEM.TOTL.ZS (ILO modelled) |
 | `central_bank.natural_unemployment` | 0.037706 | inferred | 10-year mean of WDI unemployment |
 | `government.spending_share` | 0.214538 | estimated | WDI NE.CON.GOVT.ZS |
-| `economy.initial_wage` | 6128.9 | inferred | WDI GDP (constant 2015 USD) per employed person, monthly |
-| `economy.initial_productivity` | 6128.9 | inferred | set equal to wage: price ~ (1+markup) USD per good |
+| `economy.initial_wage` | 4510.87 | inferred | WDI GDP (constant 2015 USD) per employed person, monthly |
+| `economy.initial_productivity` | 4510.87 | inferred | set equal to wage: one good costs ~1 USD of labour |
 | `economy.productivity_growth` | 0.00536762 | inferred | CAGR of WDI GDP per person employed, last 10 years |
-| `climate.emissions_intensity` | 0.000176034 | inferred | GCB fossil CO2 (via OWID) / WDI GDP constant 2015 USD, base year, per unit of real output |
+| `climate.emissions_intensity` | 0.000239176 | inferred | GCB fossil CO2 (via OWID) / WDI GDP constant 2015 USD, base year, per unit of real output |
 | `climate.decarbonisation_rate` | 0.0458402 | inferred | trend of CO2 intensity of GDP 2013-2023 |
 | `central_bank.initial_policy_rate` | 0.03 | assumed | neutral real rate 1% + inflation target |
-| `government.income_tax_rate` | 0.421875 | assumed | CALIBRATED to WDI unemployment 0.0307 (achieved 0.0335) |
+| `government.income_tax_rate` | 0.53125 | assumed | CALIBRATED to WDI unemployment 0.0307 (achieved 0.0329) |
+| `economy.capital_output_ratio` | 4 | assumed | CALIBRATED to WDI investment share 0.2199 (achieved 0.2214) |
 
 ## 1. Demographic hindcast 2000 → 2024 (WPP year-specific rates)
 
@@ -48,16 +49,17 @@ Model: mean of months 12-60 across 3 seeds (± sd across seeds). Observed: 2023 
 
 | moment | targeted? | observed | model |
 |---|---|---|---|
-| unemployment_rate | yes | 0.03071 | 0.03357 ± 0.011 |
-| household_consumption_share_gdp | no | 0.5258 | 0.7867 ± 0.00067 |
-| government_consumption_share_gdp | yes | 0.2145 | 0.2136 ± 0.00027 |
-| cpi_inflation | no | 0.02263 | 0.004845 ± 0.0011 |
-| real_gdp_growth | no | 0.01169 | -0.00213 ± 0.0021 |
-| gini_income | no | 0.337 | 0.2542 ± 0.0022 |
-| gdp_per_capita_usd | yes | 4.437e+04 | 4.22e+04 ± 26 |
+| unemployment_rate | yes | 0.03071 | 0.02725 ± 0.0069 |
+| household_consumption_share_gdp | no | 0.5258 | 0.5662 ± 0.0011 |
+| government_consumption_share_gdp | yes | 0.2145 | 0.2112 ± 0.00026 |
+| investment_share_gdp | yes | 0.2199 | 0.2228 ± 0.0009 |
+| cpi_inflation | no | 0.02263 | 0.0128 ± 0.0049 |
+| real_gdp_growth | no | 0.01169 | 0.01454 ± 0.0066 |
+| gini_income | no | 0.337 | 0.2451 ± 0.0034 |
+| gdp_per_capita_usd | yes | 4.437e+04 | 4.036e+04 ± 5.8e+02 |
 
 ### Reading the economic comparison
 
-- Alpha has no investment, housing or foreign sector, so household + government consumption must equal ~100% of model GDP; the real household consumption share is lower. This gap is structural, not a calibration error.
+- The model has business investment but no foreign sector, so C + I + G = 100% of model GDP; with a trade deficit or surplus the real shares differ accordingly. Observed investment (gross capital formation) also includes housing and public investment.
 - The Gini comparison is indicative only: WDI Ginis mix income and consumption surveys, and the model lacks within-record heterogeneity and capital income dispersion.
 - Growth in the model is the productivity trend plus labour-force change; it is not fitted to GDP growth.

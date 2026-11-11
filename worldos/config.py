@@ -107,19 +107,31 @@ class EconomyConfig(_Model):
     wage_productivity_passthrough: float = Field(1.0, ge=0, le=1.5)  # share of trend productivity growth
     downward_wage_flexibility: float = Field(0.2, ge=0, le=1)  # scales cuts relative to rises (nominal rigidity)
     markup_bounds: tuple[float, float] = (0.0, 0.5)
+    markup_reversion: float = Field(0.03, ge=0, le=1)  # monthly pull towards initial_markup (competition/entry)
     separation_rate: float = Field(0.01, ge=0, le=1)  # monthly exogenous job separations
     firing_tolerance: float = Field(0.05, ge=0)
     search_breadth: int = Field(3, ge=1)  # firms sampled per search (goods and jobs)
     market_rounds: int = Field(3, ge=1)
     consumption_income_propensity: float = Field(0.9, ge=0, le=1.5)
-    consumption_wealth_propensity: float = Field(0.02, ge=0, le=1)  # per month
+    consumption_wealth_propensity: float = Field(0.01, ge=0, le=1)  # per month (wealth target 10 months)
+    # intertemporal substitution: the income propensity falls by this much per unit of real deposit
+    # rate above the neutral real rate (a monetary-transmission channel; assumed, not estimated)
+    consumption_rate_sensitivity: float = Field(1.0, ge=0)
     income_expectation_weight: float = Field(0.25, gt=0, le=1)
     dividend_payout: float = Field(0.9, ge=0, le=1)
     liquidity_buffer_months: float = Field(1.0, ge=0)
+    # capital (one-good economy: the same good is consumed and installed as capital)
+    capital_output_ratio: float = Field(3.0, gt=0)  # capital / annual output at target utilisation
+    depreciation_rate: float = Field(0.06, ge=0, le=1)  # annual
+    target_utilisation: float = Field(0.85, gt=0, le=1)
+    investment_adjustment: float = Field(1 / 36, gt=0, le=1)  # share of capital gap closed per month
+    investment_demand_smoothing: float = Field(1 / 24, gt=0, le=1)  # weight on new sales in "normal" demand
+    investment_rate_sensitivity: float = Field(4.0, ge=0)  # response to (profit rate - loan rate)
+    max_debt_to_capital: float = Field(0.5, ge=0)  # bank lends up to this share of capital value
     productivity_growth: float = Field(0.015, ge=-0.1, le=0.2)  # annual, exogenous in Alpha
     productivity_noise: float = Field(0.002, ge=0)
     entry_delay_months: int = Field(3, ge=0)
-    initial_household_deposit_months: float = Field(5.0, ge=0)
+    initial_household_deposit_months: float = Field(10.0, ge=0)  # = (1 - c_y) / c_w, the stationary stock
     initial_firm_deposit_months: float = Field(1.5, ge=0)
     initial_firm_loan_months: float = Field(1.0, ge=0)
 
@@ -142,15 +154,17 @@ class BankConfig(_Model):
 
 
 class GovernmentConfig(_Model):
-    income_tax_rate: float = Field(0.34, ge=0, le=0.9)  # taxes + social contributions on wages
+    income_tax_rate: float = Field(0.47, ge=0, le=0.9)  # taxes + social contributions on wages
     tax_allowance_ratio: float = Field(0.1, ge=0)  # tax-free allowance as share of mean wage
     corporate_tax_rate: float = Field(0.2, ge=0, le=0.9)
     unemployment_replacement: float = Field(0.5, ge=0, le=1.5)
     pension_replacement: float = Field(0.40, ge=0, le=1.5)
-    spending_share: float = Field(0.13, ge=0, le=0.8)  # public consumption / trailing GDP
-    debt_target: float = Field(0.55, ge=0)
-    fiscal_adjustment: float = Field(0.05, ge=0)
-    max_tax_change: float = Field(0.02, ge=0)
+    spending_share: float = Field(0.15, ge=0, le=0.8)  # public consumption / trailing GDP
+    debt_target: float = Field(0.35, ge=0)
+    fiscal_adjustment: float = Field(0.01, ge=0)
+    fiscal_inflation_response: float = Field(0.0, ge=0)  # optional counter-inflation fiscal stance
+    debt_tolerance: float = Field(0.10, ge=0)  # no adjustment while |debt ratio - target| is within this band  # tighten when inflation exceeds the CB target
+    max_tax_change: float = Field(0.01, ge=0)
     tax_rate_bounds: tuple[float, float] = (0.05, 0.6)
 
 

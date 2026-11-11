@@ -48,11 +48,23 @@ def goods_conservation(world, rel: float) -> list[str]:
     return []
 
 
+def capital_conservation(world, rel: float) -> list[str]:
+    fl, f = world.flows, world.firms
+    end = float(f.capital.sum())
+    expected = fl.capital_start_units + fl.investment_units - fl.depreciation_units
+    if not _close(end, expected, fl.capital_start_units, rel * 1e3):
+        return [f"capital: closing stock {end:.6f} != opening + investment - depreciation {expected:.6f}"]
+    if (f.capital < -1e-9).any():
+        return ["negative capital stock"]
+    return []
+
+
 def expenditure_equals_revenue(world, rel: float) -> list[str]:
     fl = world.flows
     errs = []
-    if not _close(fl.consumption + fl.gov_purchases, fl.firm_revenue, fl.firm_revenue, rel):
-        errs.append(f"GDP identity: C + G = {fl.consumption + fl.gov_purchases:.6f} != firm revenue {fl.firm_revenue:.6f}")
+    final = fl.consumption + fl.investment + fl.gov_purchases
+    if not _close(final, fl.firm_revenue, fl.firm_revenue, rel):
+        errs.append(f"GDP identity: C + I + G = {final:.6f} != firm revenue {fl.firm_revenue:.6f}")
     if not _close(fl.wages_paid, fl.wages_received, fl.wages_paid, rel):
         errs.append(f"wages paid {fl.wages_paid:.6f} != wages received {fl.wages_received:.6f}")
     return errs
@@ -100,6 +112,7 @@ INVARIANTS: dict[str, Callable] = {
     "bank_balance_sheet": bank_balance_sheet,
     "central_bank_balance_sheet": central_bank_balance_sheet,
     "goods_conservation": goods_conservation,
+    "capital_conservation": capital_conservation,
     "expenditure_equals_revenue": expenditure_equals_revenue,
     "feasibility": feasibility,
     "population_consistency": population_consistency,

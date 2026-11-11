@@ -7,7 +7,7 @@ Balance-sheet matrix of the Alpha economy (single bank, closed economy):
   Loans                -Lh       -Lf    +L                                  0
   Reserves (net)                        +R                      -R          0
   Gov. account (net)                                 +G         -G          0
-  Inventories (real)             +pK                                      +pK
+  Inventories, capital           +pK                                      +pK
   Net worth            NWh       NWf    E           G            0       pK
 
 with D = Dh + Df, L = Lh + Lf, and the central-bank identity R + G = 0
@@ -36,7 +36,14 @@ class FirmTable(ColumnTable):
         "productivity": (np.float64, 1.0),  # goods per effective worker-month
         "wage_offer": (np.float64, 1.0),  # SYN$ per effective worker-month
         "inventory": (np.float64, 0.0),  # goods
+        "capital": (np.float64, 0.0),  # installed capital, goods
+        "capital_cost": (np.float64, 0.0),  # depreciation cost per unit of output at normal utilisation
+        "invest_budget": (np.float64, 0.0),  # planned investment spending this month
+        "investment_units": (np.float64, 0.0),
+        "investment_value": (np.float64, 0.0),
+        "depreciation_value": (np.float64, 0.0),
         "exp_demand": (np.float64, 0.0),  # goods / month
+        "normal_demand": (np.float64, 0.0),  # slow-moving demand used for capacity planning
         "target_output": (np.float64, 0.0),
         "labour_demand": (np.float64, 0.0),  # effective workers
         "unfilled": (np.float64, 0.0),  # effective vacancies left unfilled this month
@@ -57,7 +64,8 @@ class FirmTable(ColumnTable):
     }
 
     def unit_cost(self) -> np.ndarray:
-        return self.wage_offer / self.productivity
+        """Full unit cost: labour cost plus depreciation of capital at normal utilisation."""
+        return self.wage_offer / self.productivity + self.capital_cost
 
 
 @dataclass
@@ -96,6 +104,11 @@ class Flows:
     pensions: float = 0.0
     consumption: float = 0.0  # household spending
     consumption_units: float = 0.0
+    investment: float = 0.0
+    investment_units: float = 0.0
+    depreciation_units: float = 0.0
+    depreciation_value: float = 0.0
+    capital_start_units: float = 0.0
     gov_purchases: float = 0.0
     gov_purchase_units: float = 0.0
     firm_revenue: float = 0.0
