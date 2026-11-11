@@ -147,6 +147,24 @@ def country_config(iso3: str, base_year: int, n_records: int, n_firms: int,
             i1 = co2.loc[base_year] / gdp_s.loc[base_year]
             put("climate.decarbonisation_rate", float(-np.log(i1 / i0) / 10), ValueKind.INFERRED,
                 f"trend of CO2 intensity of GDP {y0}-{base_year}")
+    # energy system (Kaya identity with logistic wind+solar diffusion), fitted on the last 10 years
+    from worldos.energy.model import EF_T_PER_MWH, SOURCES, fit_energy, fossil_co2_t, load_energy, mix_for_year
+
+    gdp_s = sources.wdi_series(iso3, "gdp_constant_2015_usd")
+    efit = fit_energy(iso3, base_year - 10, base_year, gdp_s) if gdp is not None else None
+    if efit is not None and base_year in co2.index:
+        e_twh = float(load_energy(iso3).total.loc[base_year])
+        unit_price = unit_price_factor(apply_overrides(WorldConfig(), overrides or {}))
+        put("energy.intensity_mwh_per_unit", e_twh * 1e6 / (gdp / unit_price), ValueKind.INFERRED,
+            "OWID/Energy Institute primary energy / real output, base year")
+        put("energy.intensity_decline", efit.intensity_decline, ValueKind.INFERRED, "trend of energy/GDP, last 10 years")
+        put("energy.vre_rate", efit.vre_rate, ValueKind.INFERRED, "logistic fit of wind+solar share, last 10 years")
+        put("energy.vre_midpoint", efit.vre_midpoint, ValueKind.INFERRED, "logistic fit of wind+solar share, last 10 years")
+        k = co2.loc[base_year] * 1e6 / fossil_co2_t(e_twh * 1e6, mix_for_year(efit, base_year))
+        put("energy.reconciliation_k", k, ValueKind.INFERRED, "GCB fossil CO2 / IPCC-factor CO2 of fossil energy, base year")
+        ov["energy.base_shares"] = [efit.base_shares[s_] for s_ in SOURCES]
+        ov["energy.base_year"] = base_year
+        ov["energy.enabled"] = True
     target = ov.get("central_bank.inflation_target", 0.02)
     put("central_bank.initial_policy_rate", 0.01 + target, ValueKind.ASSUMED, "neutral real rate 1% + inflation target")
     cfg = apply_overrides(WorldConfig(), ov)

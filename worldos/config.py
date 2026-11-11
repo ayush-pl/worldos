@@ -185,6 +185,21 @@ class ClimateConfig(_Model):
     decarbonisation_rate: float = Field(0.0, ge=-0.2, le=0.5)  # annual rate of decline of intensity
 
 
+class EnergyConfig(_Model):
+    """Kaya-identity energy model (worldos/energy/model.py); disabled for the synthetic country."""
+
+    enabled: bool = False
+    base_year: int = 2023
+    intensity_mwh_per_unit: float = Field(0.0, ge=0)  # primary energy per unit of real output
+    intensity_decline: float = Field(0.0, ge=-0.2, le=0.3)  # annual
+    base_shares: list[float] = Field(default_factory=lambda: [0.0] * 9)  # coal, oil, gas, nuclear, hydro, wind, solar, biofuel, other
+    vre_ceiling: float = Field(0.6, gt=0, le=1)
+    vre_rate: float = Field(0.0, ge=0, le=2)  # logistic diffusion rate of wind+solar (per year)
+    vre_midpoint: float = 2050.0
+    reconciliation_k: float = Field(1.0, gt=0)
+    coal_phaseout_year: int | None = None
+
+
 class WorldConfig(_Model):
     simulation: SimulationConfig = Field(default_factory=SimulationConfig)
     geo: GeoConfig = Field(default_factory=GeoConfig)
@@ -195,6 +210,7 @@ class WorldConfig(_Model):
     government: GovernmentConfig = Field(default_factory=GovernmentConfig)
     central_bank: CentralBankConfig = Field(default_factory=CentralBankConfig)
     climate: ClimateConfig = Field(default_factory=ClimateConfig)
+    energy: EnergyConfig = Field(default_factory=EnergyConfig)
 
 
 def set_path(obj: Any, path: str, value: Any) -> None:

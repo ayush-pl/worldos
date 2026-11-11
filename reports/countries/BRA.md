@@ -21,6 +21,11 @@ Geography: Natural Earth; H3 resolution 4, 4471 cells, 27 admin-1 regions, 40 ci
 | `economy.productivity_growth` | -0.00194885 | inferred | CAGR of WDI GDP per person employed, last 10 years |
 | `climate.emissions_intensity` | 0.000336219 | inferred | GCB fossil CO2 (via OWID) / WDI GDP constant 2015 USD, base year, per unit of real output |
 | `climate.decarbonisation_rate` | 0.0143704 | inferred | trend of CO2 intensity of GDP 2013-2023 |
+| `energy.intensity_mwh_per_unit` | 0.00260176 | inferred | OWID/Energy Institute primary energy / real output, base year |
+| `energy.intensity_decline` | -0.00178193 | inferred | trend of energy/GDP, last 10 years |
+| `energy.vre_rate` | 0.280786 | inferred | logistic fit of wind+solar share, last 10 years |
+| `energy.vre_midpoint` | 2028.36 | inferred | logistic fit of wind+solar share, last 10 years |
+| `energy.reconciliation_k` | 0.989836 | inferred | GCB fossil CO2 / IPCC-factor CO2 of fossil energy, base year |
 | `central_bank.initial_policy_rate` | 0.04 | assumed | neutral real rate 1% + inflation target |
 | `government.income_tax_rate` | 0.418359 | assumed | CALIBRATED to WDI unemployment 0.0795 (achieved 0.0808) |
 | `economy.capital_output_ratio` | 2.875 | assumed | CALIBRATED to WDI investment share 0.1576 (achieved 0.1556) |

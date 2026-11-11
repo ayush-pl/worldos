@@ -44,6 +44,8 @@ def _cmd_experiment(args: argparse.Namespace) -> int:
     spec = load_experiment(args.spec)
     if args.seeds:
         spec.seeds = list(range(1, args.seeds + 1))
+    if args.country:
+        spec.country = args.country
     result = run_experiment(spec)
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -88,7 +90,10 @@ def _cmd_data(args: argparse.Namespace) -> int:
 
     from worldos.data.connectors.kontur import fetch_kontur
 
-    fetchers = {"wpp": fetch_wpp, "wdi": fetch_wdi, "naturalearth": fetch_naturalearth, "kontur": fetch_kontur}
+    from worldos.data.connectors.energy import fetch_energy
+
+    fetchers = {"wpp": fetch_wpp, "wdi": fetch_wdi, "naturalearth": fetch_naturalearth, "kontur": fetch_kontur,
+                "energy": fetch_energy}
     countries = args.countries.split(",") if args.countries else None
     for name in args.sources.split(","):
         if name == "climate":
@@ -158,6 +163,13 @@ def _cmd_climate(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_energy(args: argparse.Namespace) -> int:
+    from worldos.energy.model import energy_report
+
+    print(energy_report())
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="worldos", description="WORLD-OS Alpha (synthetic-country prototype)")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -171,6 +183,7 @@ def main(argv: list[str] | None = None) -> int:
     e.add_argument("spec")
     e.add_argument("--seeds", type=int, default=0, help="override: use seeds 1..N")
     e.add_argument("--out", default="results/experiment")
+    e.add_argument("--country", default=None, help="run on a real-country world (ISO3), e.g. IND")
     e.set_defaults(func=_cmd_experiment)
     v = sub.add_parser("validate", help="run the Alpha validation suite")
     v.add_argument("--seed", type=int, default=1)
@@ -180,7 +193,7 @@ def main(argv: list[str] | None = None) -> int:
     c.set_defaults(func=_cmd_catalogue)
     d = sub.add_parser("data", help="fetch real data extracts or verify their checksums")
     d.add_argument("action", choices=["fetch", "verify"])
-    d.add_argument("--sources", default="wpp,wdi,naturalearth,kontur,climate")
+    d.add_argument("--sources", default="wpp,wdi,naturalearth,kontur,energy,climate")
     d.add_argument("--countries", default="", help="comma-separated ISO3 codes (default: the six committed)")
     d.set_defaults(func=_cmd_data)
     k = sub.add_parser("country", help="real-country worlds: list | calibrate | validate | run")
@@ -197,6 +210,9 @@ def main(argv: list[str] | None = None) -> int:
     m.add_argument("action", choices=["validate", "scenario"])
     m.add_argument("--net-zero", type=int, default=None, help="year global CO2 reaches zero (omit: constant)")
     m.set_defaults(func=_cmd_climate)
+    en = sub.add_parser("energy", help="energy model: validate (out-of-sample backtest)")
+    en.add_argument("action", choices=["validate"])
+    en.set_defaults(func=_cmd_energy)
     args = parser.parse_args(argv)
     return args.func(args)
 

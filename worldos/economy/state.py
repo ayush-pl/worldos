@@ -132,6 +132,7 @@ class Flows:
     deaths: float = 0.0
     immigrants: float = 0.0
     co2_emissions_t: float = 0.0
+    primary_energy_mwh: float = 0.0
     emigrants: float = 0.0
     bankruptcies: int = 0
     entries: int = 0

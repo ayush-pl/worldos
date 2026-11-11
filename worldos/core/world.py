@@ -46,6 +46,8 @@ class World:
     demographic_rates: Any = None  # population.empirical.DemographicRates for real countries
     country: Any = None  # countries.build.CountryInfo for real countries
     emissions_intensity: float | None = None  # current tCO2 per unit real output (state; starts from config)
+    energy_intensity: float | None = None  # current MWh per unit real output (state; starts from config)
+    energy_mix: dict | None = None
 
     def clone(self) -> "World":
         return copy.deepcopy(self)

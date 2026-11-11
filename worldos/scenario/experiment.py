@@ -47,6 +47,7 @@ class ScenarioSpec(BaseModel):
     name: str
     description: str = ""
     overrides: dict[str, Any] = Field(default_factory=dict)  # config paths applied at the branch point
+    scale_overrides: dict[str, float] = Field(default_factory=dict)  # multiply current config values at the branch
     interventions: list[Intervention] = Field(default_factory=list)
 
 
@@ -62,6 +63,9 @@ class ExperimentSpec(BaseModel):
     summary_window_months: int = Field(12, ge=1)
     outcomes: list[str] = Field(default_factory=lambda: list(DEFAULT_OUTCOMES))
     base_overrides: dict[str, Any] = Field(default_factory=dict)  # applied before warm-up to every arm
+    country: str | None = None  # ISO3 of a real-country world (uses committed data and calibration)
+    country_records: int = Field(20_000, ge=100)
+    country_firms: int = Field(200, ge=2)
 
 
 @dataclass
@@ -73,6 +77,10 @@ class ExperimentResult:
 
 
 def _prepare_arm(world, arm: ScenarioSpec) -> None:
+    from worldos.config import get_path
+
+    for path, factor in arm.scale_overrides.items():
+        set_path(world.config, path, get_path(world.config, path) * factor)
     for path, value in arm.overrides.items():
         set_path(world.config, path, value)
         # instruments initialised from config must follow config overrides at the branch point
@@ -92,7 +100,13 @@ def run_experiment(spec: ExperimentSpec, config: WorldConfig | None = None) -> E
         raise ValueError("arm names must be unique")
     frames = []
     for seed in spec.seeds:
-        world = build_world(config, seed)
+        if spec.country:
+            from worldos.countries.build import build_country_world
+
+            world = build_country_world(spec.country.upper(), 2023, spec.country_records, spec.country_firms, seed,
+                                        overrides=spec.base_overrides or None)
+        else:
+            world = build_world(config, seed)
         Simulation(world, default_engines()).run(spec.warmup_months)
         branch_tick = world.clock.tick
         for arm in arms:
@@ -169,8 +183,12 @@ def render_markdown(result: ExperimentResult) -> str:
         "## Arms",
         "",
     ]
+    if s.country:
+        lines.insert(4, f"**World:** real-country world `{s.country}` (committed real data, calibrated economy).")
+        lines.insert(5, "")
     for arm in [s.baseline, *s.variants]:
         lines.append(f"- **{arm.name}**: {arm.description or '-'}; overrides `{json.dumps(arm.overrides)}`; "
+                     f"scaled `{json.dumps(arm.scale_overrides)}`; "
                      f"interventions `{json.dumps([iv.model_dump() for iv in arm.interventions])}`")
     lines += ["", "## Outcomes by arm (mean across seeds, [5th, 95th] percentile)", ""]
     pivot_rows = ["| outcome | " + " | ".join([s.baseline.name, *[v.name for v in s.variants]]) + " |",

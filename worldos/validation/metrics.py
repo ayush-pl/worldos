@@ -119,5 +119,8 @@ def compute_metrics(world) -> dict:
         "emigrants": fl.emigrants,
         "co2_mt_annualised": 12 * fl.co2_emissions_t / 1e6,
         "co2_intensity": world.emissions_intensity or 0.0,
+        "primary_energy_twh_annualised": 12 * fl.primary_energy_mwh / 1e6,
+        "wind_solar_share": (world.energy_mix["wind"] + world.energy_mix["solar"]) if world.energy_mix else float("nan"),
+        "coal_share": world.energy_mix["coal"] if world.energy_mix else float("nan"),
         "retired_share": float(w[alive & (p.status == RETIRED)].sum()) / pop if pop else float("nan"),
     }

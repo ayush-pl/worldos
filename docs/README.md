@@ -13,6 +13,7 @@
 | 09 | [Implementation roadmap](09-implementation-roadmap.md) | 18 Testing strategy (partial) · 20 Long-term roadmap | v0.1 |
 | 10 | [Alpha implementation report](10-alpha-report.md) | Task 10 | v0.1 |
 | 11 | [Real data, countries, climate](11-real-data-countries-climate.md) | M2, M3, M4 (part), Phase 3 start | v0.1 |
+| 12 | [Capital, calibration, maps, energy](12-capital-calibration-maps-energy.md) | Phase 2 capital, M4 two-target calibration, gridded population, energy model | v0.1 |
 
 Not yet written as standalone documents: 19 Deployment & infrastructure plan, and full-length
 versions of the summarised specifications in 03 (each is scheduled with its implementation milestone).

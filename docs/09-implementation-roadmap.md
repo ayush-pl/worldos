@@ -11,10 +11,12 @@ change them. Each milestone has acceptance tests that must pass before the next 
 | M1 | Synthetic one-country world: geography, population, SFC economy, institutions, scenario lab, validation suite, CLI, HTML dashboard | ✅ | full pytest suite; `worldos validate` all PASS; 10⁶ records < 1 s/month |
 | M2 | Data connectors: UN WPP, World Bank WDI, Natural Earth, climate records; checksummed extracts | ✅ (persistence in Parquet/PostGIS still ⏳) | checksummed raw files; provenance complete on 100% of observations; licence gate tested |
 | M3 | Real-country population from WPP (empirical schedules, residual migration); hindcast and projection benchmarks | ✅ six countries (household fitting to census marginals still ⏳) | micro vs WPP age-sex structure TVD < 0.02 at base year; 10-year projection within WPP 80% interval |
-| M4 | Calibration v1: moment matching / SBI of economic parameters to national accounts and labour statistics | ◐ one-parameter calibration to unemployment + untargeted-moment reports | target moments inside tolerance; posterior predictive checks; parameter identifiability report |
+| M4 | Calibration v1: moment matching / SBI of economic parameters to national accounts and labour statistics | ◐ two-target calibration (unemployment, investment share) + untargeted-moment reports; SBI still ⏳ | target moments inside tolerance; posterior predictive checks; parameter identifiability report |
 | M5 | API + run store + run manifests; minimal web dashboard | ⏳ | reproduce any stored run bit-for-bit from its manifest |
 
 ## Phase 2 — Economic civilisation (6–12)
+
+*Started:* capital, investment and monetary transmission implemented (docs/12).
 
 Multi-sector input-output production; capital investment and depreciation; housing and mortgages;
 consumer credit; multiple banks with an interbank market; firm entry/exit by sector; progressive
@@ -24,7 +26,7 @@ distribution, investment volatility > consumption volatility, procyclical credit
 
 ## Phase 3 — Environmental integration (12–24)
 
-*Started:* climate emulator validated against observations; territorial CO2 accounting in country economies (docs/11).
+*Started:* climate emulator validated against observations; Kaya energy model with technology diffusion and an out-of-sample backtest; CO2 from fuel use in country economies (docs/11, docs/12).
 
 Emissions accounting per sector; simple climate model coupling (FaIR-type) for global temperature;
 energy engine (generation mix, dispatch, prices); agriculture with yield emulators; water balance;
@@ -59,7 +61,7 @@ engine) · security & governance (RBAC, audit, ethics review) · documentation o
 
 ## Immediate next tasks
 
-1. **Capital and investment** (closes the consumption-share gap and gives monetary policy a channel).
-2. **Multi-moment calibration** (simulation-based inference over ~10 parameters; targets incl. Gini, inflation).
-3. **Global sensitivity analysis** (Morris screening) of real-country worlds.
-4. **Gridded population** (WorldPop/GHSL) for spatial allocation; **energy engine** behind emissions.
+1. **Energy prices and costs** feeding firm costs, so energy policy affects the economy.
+2. **Growth expectations in investment** and simulation-based multi-moment calibration.
+3. **Climate damages** to productivity and health; regional climate on the gridded layer.
+4. **Regional labour markets** (commuting) using gridded population; housing.

@@ -18,6 +18,8 @@ class EmissionsEngine(Engine):
     order = 55  # after production
 
     def step(self, world) -> None:
+        if world.config.energy.enabled:  # the energy engine computes emissions from fuel use instead
+            return
         c = world.config.climate
         if world.emissions_intensity is None:
             world.emissions_intensity = c.emissions_intensity

@@ -1,0 +1,22 @@
+name = "india_energy_transition"
+question = "How much lower are India's CO2 emissions within five years if coal is phased out by 2040, with and without twice-as-fast wind+solar diffusion? (No energy-cost feedback to the economy is modelled.)"
+country = "IND"
+seeds = [1, 2, 3]
+warmup_months = 12
+horizon_months = 60
+outcomes = ["co2_mt_annualised", "wind_solar_share", "coal_share", "primary_energy_twh_annualised", "gdp_real", "unemployment_rate"]
+
+[baseline]
+name = "baseline"
+description = "Fitted 2013-2023 energy trends continue"
+
+[[variants]]
+name = "coal_phaseout_2040"
+description = "Coal share falls linearly to zero by 2040 (replaced by oil and gas)"
+overrides = { "energy.coal_phaseout_year" = 2040 }
+
+[[variants]]
+name = "phaseout_and_fast_renewables"
+description = "Coal phase-out by 2040 and wind+solar diffusion rate doubled"
+overrides = { "energy.coal_phaseout_year" = 2040 }
+scale_overrides = { "energy.vre_rate" = 2.0 }

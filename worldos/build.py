@@ -8,6 +8,7 @@ from worldos.core.clock import EventScheduler, SimDate, SimulationClock
 from worldos.core.rng import RandomStreams
 from worldos.core.world import World
 from worldos.climate.emissions import EmissionsEngine
+from worldos.energy.model import EnergyEngine
 from worldos.economy.engines import (
     CreditEngine, FirmFinanceEngine, FirmPlanningEngine, GoodsMarketEngine, HouseholdExpectationsEngine,
     IncomeEngine, LabourMarketEngine, ProductionEngine, TechnologyEngine,
@@ -63,6 +64,6 @@ def neutral_debt_target(world) -> float:
 def default_engines() -> list:
     return [
         DemographyEngine(), TechnologyEngine(), FirmPlanningEngine(), CreditEngine(), LabourMarketEngine(),
-        ProductionEngine(), EmissionsEngine(), IncomeEngine(), GoodsMarketEngine(), FirmFinanceEngine(),
+        ProductionEngine(), EmissionsEngine(), EnergyEngine(), IncomeEngine(), GoodsMarketEngine(), FirmFinanceEngine(),
         HouseholdExpectationsEngine(), CentralBankEngine(), GovernmentPolicyEngine(), MetricsEngine(),
     ]

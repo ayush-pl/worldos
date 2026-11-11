@@ -1,0 +1,15 @@
+{
+  "source": "Our World in Data energy dataset (Energy Institute Statistical Review, Ember)",
+  "license": "CC BY 4.0",
+  "retrieved_utc": "2026-11-11T12:37:35+00:00",
+  "notes": "",
+  "files": [
+    {
+      "file": "energy_owid.csv",
+      "url": "https://raw.githubusercontent.com/owid/energy-data/master/owid-energy-data.csv",
+      "rows": 252,
+      "filter": "['BRA', 'DEU', 'IND', 'JPN', 'NGA', 'USA'] + World, year >= 1990; TWh of primary energy",
+      "sha256": "1e263f78c093cd3f77ec1cad8e470872f96bb6f64a795d8db5b58e85b292c125"
+    }
+  ]
+}

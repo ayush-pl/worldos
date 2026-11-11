@@ -6,13 +6,15 @@
 This repository contains the **specification documents** for WORLD-OS (`docs/`) and **WORLD-OS
 Alpha** (`worldos/`), a working and tested prototype. It simulates either a synthetic country or
 one of **six real countries** (India, USA, Germany, Japan, Brazil, Nigeria) built from real data:
-UN WPP 2024 demography, World Bank WDI macro data, Natural Earth geography, and global climate
-records (Global Carbon Budget, NOAA, HadCRUT5, IPCC AR6). See [docs/11](docs/11-real-data-countries-climate.md),
+UN WPP 2024 demography, World Bank WDI macro data, Natural Earth geography, Kontur gridded population,
+OWID energy data, and global climate records (Global Carbon Budget, NOAA, HadCRUT5, IPCC AR6).
+See [docs/11](docs/11-real-data-countries-climate.md), [docs/12](docs/12-capital-calibration-maps-energy.md),
+the [energy report](reports/energy.md),
 [country validation reports](reports/countries/) and the [climate report](reports/climate.md).
 
 > **Scope, stated plainly.** Alpha is *not* a digital twin of Earth. Real-country worlds reproduce WPP
-> demography closely, but their economies are simplified (no capital, housing or foreign sector) and
-> calibrated to a single target. It is the foundation such a
+> demography closely, but their economies are simplified (one good, no housing or foreign sector) and
+> calibrated to two targets. It is the foundation such a
 > system needs: a reproducible simulation kernel, a demographic microsimulation, a stock-flow
 > consistent agent-based economy with institutions, a validated action pathway for AI agents, a
 > scenario laboratory with uncertainty, and a provenance-aware data layer. Its parameters are
@@ -52,6 +54,10 @@ python -m worldos country run IND --months 60 --out results/india
 python -m worldos climate scenario --net-zero 2060
 ```
 
+```bash
+python -m worldos experiment examples/experiments/india_energy_transition.toml
+```
+
 `run` writes `metrics.csv`, `audit_log.json` (every policy action, accepted or rejected),
 `config.json` and a self-contained `dashboard.html`.
 
@@ -62,12 +68,12 @@ python -m worldos climate scenario --net-zero 2060
 | Kernel | monthly clock, multi-rate engines, event queue, named RNG streams, world cloning, per-tick invariant checks | distributed execution |
 | Geography | H3 hierarchy (planet → country → region → city → cells), resolution changes, synthetic territory | real boundaries, physical Earth layers |
 | Population | Siler mortality, Hadwiger fertility, Lotka stable start, weighted microsimulation, cohort-component twin, schooling, labour entry, retirement, household formation & inheritance | migration, partnership formation, health |
-| Economy | firms, households, bank, central bank, government; labour, goods and credit markets; SFC accounting; GDP (two sides), CPI, unemployment, Gini, poverty | multi-sector, capital, housing, trade, FX |
+| Economy | firms, households, bank, central bank, government; labour, goods, credit and investment markets; capital and depreciation; SFC accounting; GDP (two sides), CPI, unemployment, Gini, poverty | multi-sector, housing, trade, FX |
 | Institutions | Taylor-rule central bank, debt-rule fiscal policy, validated through an action kernel with audit | optimisation/RL/LLM policies (interface ready) |
 | Experiments | branch from warm-up, overrides & dated interventions, multi-seed ensembles with common random numbers, paired 95% CIs, markdown report | sensitivity analysis, optimisation |
 | Data | 30-dataset catalogue, provenance store, licence-gated ingestion, connectors for WPP, WDI, Natural Earth, climate | Parquet/PostGIS persistence |
-| Real data | WPP, WDI, Natural Earth, GCB/NOAA/HadCRUT5/AR6 extracts with checksums; six calibrated countries | more countries, gridded population, census microdata |
-| Environment | global climate emulator validated out of sample; country CO2 accounting | damages, energy, water, agriculture, biodiversity (Phase 3) |
+| Real data | WPP, WDI, Natural Earth, Kontur gridded population (H3), OWID energy, GCB/NOAA/HadCRUT5/AR6 extracts with checksums; six countries calibrated to unemployment and investment share | more countries, census microdata |
+| Environment | global climate emulator and country energy model (Kaya + diffusion), both validated out of sample | energy prices, damages, water, agriculture, biodiversity (Phase 3) |
 
 Performance on one CPU core: 10⁶ person records and 10³ firms take about 0.6 s per simulated month,
 with all accounting invariants checked every month.

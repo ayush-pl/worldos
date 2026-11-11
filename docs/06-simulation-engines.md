@@ -117,8 +117,8 @@ seed variability only — parameter and structural uncertainty need separate sen
 
 ## 8. Known limitations (Alpha)
 
-Single good; no capital investment, housing, foreign sector, exchange rate or migration; single
-bank; government spending purely consumption; labour market national (no commuting geography);
+(Updated: capital and investment, migration for real countries, and energy are now implemented — see
+docs/11-12.) Single good; no housing, foreign sector or exchange rate; single bank; government spending purely consumption; labour market national (no commuting geography);
 exogenous productivity; no environment. Monetary policy works only weakly (no interest-sensitive
 investment or housing), so the economy can sit at the zero lower bound after demand shocks — a
 property of this model, not a claim about real economies.
